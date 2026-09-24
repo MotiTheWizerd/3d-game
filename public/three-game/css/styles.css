@@ -87,6 +87,34 @@ body {
   color: var(--coin);
 }
 
+#hud-mute {
+  pointer-events: auto;
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  width: 48px;
+  height: 48px;
+  border-radius: 14px;
+  background: var(--panel);
+  border: 1px solid var(--panel-border);
+  backdrop-filter: blur(12px);
+  color: var(--text);
+  font-size: 20px;
+  line-height: 1;
+  cursor: pointer;
+  transition: transform 0.15s ease, border-color 0.15s ease;
+}
+
+#hud-mute:hover {
+  transform: translateY(-2px);
+  border-color: var(--accent-2);
+}
+
+#hud-mute:focus-visible {
+  outline: 2px solid var(--accent-2);
+  outline-offset: 2px;
+}
+
 .overlay {
   position: absolute;
   inset: 0;
@@ -189,6 +217,14 @@ kbd {
   #hud-top {
     top: 12px;
     gap: 8px;
+  }
+
+  #hud-mute {
+    top: 12px;
+    right: 12px;
+    width: 40px;
+    height: 40px;
+    font-size: 16px;
   }
 
   .hud-stat {

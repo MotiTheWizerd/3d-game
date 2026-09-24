@@ -3,6 +3,7 @@ import { InputManager } from "./core/InputManager.js";
 import { EventBus } from "./core/EventBus.js";
 import { Game } from "./game/Game.js";
 import { HUD } from "./ui/HUD.js";
+import { AudioManager } from "./systems/AudioManager.js";
 
 function bootstrap() {
   const container = document.getElementById("game-root");
@@ -16,6 +17,9 @@ function bootstrap() {
 
   const engine = new Engine(container);
   const hud = new HUD(events);
+  const audio = new AudioManager(events);
+  audio.attach(window);
+  audio.publishMuteState();
   const game = new Game({ engine, events, input, hud });
 
   engine.onUpdate = (dt) => game.update(dt);
@@ -23,6 +27,7 @@ function bootstrap() {
 
   window.addEventListener("beforeunload", () => {
     input.detach();
+    audio.destroy();
     engine.stop();
   });
 }

@@ -8,9 +8,22 @@ export class HUD {
     this.scoreEl = document.getElementById("hud-score");
     this.bestEl = document.getElementById("hud-best");
     this.coinsEl = document.getElementById("hud-coins");
+    this.muteEl = document.getElementById("hud-mute");
 
     this.onButton = null;
     this.buttonEl.addEventListener("click", () => this.onButton?.());
+
+    // Mute is owned by AudioManager; the HUD only mirrors its state.
+    this.muteEl.addEventListener("click", () => {
+      this.events.emit("audio:toggle-requested", null);
+      this.muteEl.blur();
+    });
+
+    this.events.on("audio:muted-changed", ({ muted }) => {
+      this.muteEl.textContent = muted ? "🔇" : "🔊";
+      this.muteEl.setAttribute("aria-pressed", String(muted));
+      this.muteEl.title = muted ? "Unmute (M)" : "Mute (M)";
+    });
 
     this.events.on("score:changed", ({ score, coins, best }) => {
       this.scoreEl.textContent = String(score);

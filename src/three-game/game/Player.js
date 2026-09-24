@@ -2,8 +2,9 @@ import * as THREE from "three";
 import { CONFIG } from "../config.js";
 
 export class Player {
-  constructor(scene) {
+  constructor(scene, events = null) {
     this.scene = scene;
+    this.events = events;
     this.laneIndex = 1;
     this.velocityY = 0;
     this.grounded = true;
@@ -35,15 +36,18 @@ export class Player {
   handleInput(input) {
     if (!this.active) return;
 
-    if (input.consume("left")) {
-      this.laneIndex = Math.max(0, this.laneIndex - 1);
+    if (input.consume("left") && this.laneIndex > 0) {
+      this.laneIndex -= 1;
+      this.events?.emit("player:lane", this.laneIndex);
     }
-    if (input.consume("right")) {
-      this.laneIndex = Math.min(CONFIG.lanes.length - 1, this.laneIndex + 1);
+    if (input.consume("right") && this.laneIndex < CONFIG.lanes.length - 1) {
+      this.laneIndex += 1;
+      this.events?.emit("player:lane", this.laneIndex);
     }
     if (input.consume("jump") && this.grounded) {
       this.velocityY = CONFIG.player.jumpVelocity;
       this.grounded = false;
+      this.events?.emit("player:jumped", null);
     }
   }
 

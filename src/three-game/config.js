@@ -55,6 +55,11 @@ export const CONFIG = {
     bestKey: "neon-runner-best",
   },
 
+  audio: {
+    masterVolume: 0.9,
+    mutedKey: "neon-runner-muted",
+  },
+
   colors: {
     player: 0x00e5ff,
     playerEmissive: 0x004d5a,

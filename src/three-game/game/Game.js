@@ -23,7 +23,7 @@ export class Game {
     this.speed = CONFIG.speed.initial;
 
     this.world = new World(engine.scene);
-    this.player = new Player(engine.scene);
+    this.player = new Player(engine.scene, events);
     this.obstacles = new ObstacleSpawner(engine.scene);
     this.coins = new CoinSpawner(engine.scene);
     this.collisions = new CollisionSystem();
@@ -49,15 +49,22 @@ export class Game {
     this.score.reset();
     this.hud.hide();
     this.events.emit("state:changed", this.state);
+    this.events.emit("run:started", null);
   }
 
   endRun() {
     if (this.state !== STATE.PLAYING) return;
     this.state = STATE.GAME_OVER;
     this.player.setActive(false);
+    const previousBest = this.score.best;
     const finalScore = this.score.finalize();
     this.hud.showGameOver(finalScore, this.score.best);
     this.events.emit("state:changed", this.state);
+    this.events.emit("run:ended", {
+      score: finalScore,
+      best: this.score.best,
+      isNewBest: finalScore > previousBest && finalScore > 0,
+    });
   }
 
   update(dt) {
@@ -96,6 +103,7 @@ export class Game {
         for (const index of collected) {
           this.coins.collect(index);
           this.score.addCoin();
+          this.events.emit("coin:collected", null);
         }
       }
     } else if (this.state === STATE.READY) {
