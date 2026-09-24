@@ -9,6 +9,8 @@ export class HUD {
     this.bestEl = document.getElementById("hud-best");
     this.coinsEl = document.getElementById("hud-coins");
     this.muteEl = document.getElementById("hud-mute");
+    this.dashEl = document.getElementById("hud-dash");
+    this.dashFillEl = document.getElementById("hud-dash-fill");
 
     this.onButton = null;
     this.buttonEl.addEventListener("click", () => this.onButton?.());
@@ -29,6 +31,11 @@ export class HUD {
       this.scoreEl.textContent = String(score);
       this.coinsEl.textContent = String(coins);
       this.bestEl.textContent = String(best);
+    });
+
+    this.events.on("dash:energy-changed", (energy) => {
+      this.dashFillEl.style.width = `${Math.round(energy * 100)}%`;
+      this.dashEl.classList.toggle("ready", energy >= 1 - 1e-9);
     });
   }
 

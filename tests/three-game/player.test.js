@@ -111,6 +111,51 @@ test("getBounds matches CONFIG half-extents around current position", () => {
   );
 });
 
+test("dash: inactive until started, expires after duration, timer never negative", () => {
+  const player = makePlayer();
+  assert.equal(player.dashing, false);
+
+  player.startDash(CONFIG.dash.duration);
+  assert.equal(player.dashing, true);
+  assert.equal(player.dashTimer, CONFIG.dash.duration);
+
+  // step until well past the duration (fp margin: 0.1 sums land just under 1.2)
+  const steps = Math.ceil(CONFIG.dash.duration / 0.1) + 3;
+  for (let i = 0; i < steps; i++) player.update(0.1);
+  assert.equal(player.dashing, false, "dash must expire");
+  assert.equal(player.dashTimer, 0, "timer clamps at zero, never negative");
+});
+
+test("dash: body brightens while dashing and eases back after", () => {
+  const player = makePlayer();
+  const restEmissive = player.mesh.material.emissiveIntensity;
+
+  player.startDash(CONFIG.dash.duration);
+  player.update(0.05);
+  assert.ok(
+    player.mesh.material.emissiveIntensity > restEmissive,
+    `emissive ${player.mesh.material.emissiveIntensity} above rest ${restEmissive}`
+  );
+  assert.ok(player.glow.intensity > 8, "glow runs hotter while dashing");
+
+  for (let i = 0; i < 200; i++) player.update(0.016); // well past expiry
+  assert.ok(
+    Math.abs(player.mesh.material.emissiveIntensity - 0.6) < 0.05,
+    `emissive settles at 0.6, got ${player.mesh.material.emissiveIntensity}`
+  );
+});
+
+test("reset clears dash state and visuals", () => {
+  const player = makePlayer();
+  player.startDash(CONFIG.dash.duration);
+  player.update(0.05);
+  player.reset();
+  assert.equal(player.dashing, false);
+  assert.equal(player.dashTimer, 0);
+  assert.equal(player.mesh.material.emissiveIntensity, 0.6);
+  assert.equal(player.glow.intensity, 8);
+});
+
 test("reset returns player to middle lane, grounded, zeroed rotation", () => {
   const player = makePlayer();
   player.handleInput(makeInput({ left: true, jump: true }));

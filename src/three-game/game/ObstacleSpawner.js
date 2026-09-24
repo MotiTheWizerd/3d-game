@@ -98,6 +98,14 @@ export class ObstacleSpawner {
     return this.active;
   }
 
+  /** Dash smash: remove the obstacle at `index` of getActive() and recycle it. */
+  smash(index) {
+    const mesh = this.active[index];
+    if (!mesh) return;
+    this.active.splice(index, 1);
+    this.release(mesh);
+  }
+
   reset() {
     for (const mesh of this.active) {
       this.release(mesh);

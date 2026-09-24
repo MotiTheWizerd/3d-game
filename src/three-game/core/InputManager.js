@@ -6,6 +6,8 @@ const KEY_MAP = {
   ArrowUp: "jump",
   KeyW: "jump",
   Space: "jump",
+  ShiftLeft: "dash",
+  ShiftRight: "dash",
   Enter: "confirm",
 };
 

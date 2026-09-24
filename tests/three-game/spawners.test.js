@@ -55,6 +55,30 @@ test("obstacles recycle to the pool after passing recycleZ", () => {
   assert.ok(spawner.pool.length >= spawned, "recycled meshes returned to pool");
 });
 
+test("smash removes exactly the obstacle at index and recycles it", () => {
+  const spawner = new ObstacleSpawner(makeScene());
+  spawner.update(2.0, 0); // spawn a wave (1-2 blocks)
+  const before = spawner.getActive().length;
+  assert.ok(before >= 1);
+
+  const target = spawner.getActive()[0];
+  spawner.smash(0);
+
+  assert.equal(spawner.getActive().length, before - 1);
+  assert.equal(target.visible, false, "smashed mesh hidden back to pool");
+  assert.ok(spawner.pool.includes(target));
+  // surviving obstacles keep their identity and order
+  for (let i = 0; i < spawner.getActive().length; i++) {
+    assert.notEqual(spawner.getActive()[i], target);
+  }
+});
+
+test("smash with an out-of-range index is a safe no-op", () => {
+  const spawner = new ObstacleSpawner(makeScene());
+  spawner.smash(5);
+  assert.equal(spawner.getActive().length, 0);
+});
+
 test("pool is reused instead of growing forever", () => {
   const spawner = new ObstacleSpawner(makeScene());
   for (let i = 0; i < 50; i++) spawner.update(2.0, 24);

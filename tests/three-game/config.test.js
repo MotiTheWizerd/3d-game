@@ -47,6 +47,17 @@ test("coin config: pack bounds and spacing valid", () => {
   assert.ok(c.y > 0);
 });
 
+test("dash config: sane burst values", () => {
+  const d = CONFIG.dash;
+  assert.ok(d.duration > 0, "dash must last some time");
+  assert.ok(d.speedMultiplier > 1, "dash must be faster than base speed");
+  assert.ok(d.energyPerCoin > 0 && d.energyPerCoin <= 1, "coin energy is a fraction of the meter");
+  assert.ok(d.smashBonus > 0, "smashing must reward points");
+  // 1/energyPerCoin coins fill the meter — must be a sane count
+  const coinsPerDash = 1 / d.energyPerCoin;
+  assert.ok(coinsPerDash >= 2 && coinsPerDash <= 10, `coins per dash ${coinsPerDash} within reason`);
+});
+
 test("score best key is a non-empty string", () => {
   assert.equal(typeof CONFIG.score.bestKey, "string");
   assert.ok(CONFIG.score.bestKey.length > 0);

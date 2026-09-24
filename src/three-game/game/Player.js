@@ -9,6 +9,7 @@ export class Player {
     this.velocityY = 0;
     this.grounded = true;
     this.active = true;
+    this.dashTimer = 0;
 
     const colors = CONFIG.colors;
     const geometry = new THREE.BoxGeometry(0.9, 1.1, 0.9);
@@ -31,6 +32,15 @@ export class Player {
 
   get position() {
     return this.mesh.position;
+  }
+
+  get dashing() {
+    return this.dashTimer > 0;
+  }
+
+  /** Called by the Game when a dash is triggered — the Player owns the feel. */
+  startDash(duration) {
+    this.dashTimer = duration;
   }
 
   handleInput(input) {
@@ -67,6 +77,20 @@ export class Player {
       }
     }
 
+    if (this.dashTimer > 0) {
+      this.dashTimer = Math.max(0, this.dashTimer - dt);
+    }
+
+    // Dash visual: brighter body + hotter glow, eased in/out with the timer.
+    const targetEmissive = this.dashing ? 1.6 : 0.6;
+    const targetGlow = this.dashing ? 18 : 8;
+    this.mesh.material.emissiveIntensity = THREE.MathUtils.lerp(
+      this.mesh.material.emissiveIntensity,
+      targetEmissive,
+      0.25
+    );
+    this.glow.intensity = THREE.MathUtils.lerp(this.glow.intensity, targetGlow, 0.25);
+
     const lean = (targetX - this.mesh.position.x) * 0.35;
     this.mesh.rotation.z = THREE.MathUtils.lerp(this.mesh.rotation.z, -lean, 0.2);
     this.mesh.rotation.x = THREE.MathUtils.lerp(
@@ -93,6 +117,9 @@ export class Player {
     this.velocityY = 0;
     this.grounded = true;
     this.active = true;
+    this.dashTimer = 0;
+    this.mesh.material.emissiveIntensity = 0.6;
+    this.glow.intensity = 8;
     this.mesh.position.set(CONFIG.lanes[this.laneIndex], CONFIG.player.restY, 0);
     this.mesh.rotation.set(0, 0, 0);
   }

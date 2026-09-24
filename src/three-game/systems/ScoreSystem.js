@@ -40,6 +40,12 @@ export class ScoreSystem {
     this.publish();
   }
 
+  /** Dash smash bonus + any other flat points. */
+  addBonus(points) {
+    this.distance += points;
+    this.publish();
+  }
+
   get score() {
     return Math.floor(this.distance) + this.coins * CONFIG.coins.value;
   }

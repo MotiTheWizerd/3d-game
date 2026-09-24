@@ -21,6 +21,7 @@ export class Game {
 
     this.state = STATE.READY;
     this.speed = CONFIG.speed.initial;
+    this.dashEnergy = 0;
 
     this.world = new World(engine.scene);
     this.player = new Player(engine.scene, events);
@@ -42,6 +43,7 @@ export class Game {
   startRun() {
     this.state = STATE.PLAYING;
     this.speed = CONFIG.speed.initial;
+    this.setDashEnergy(0);
     this.world.reset();
     this.player.reset();
     this.obstacles.reset();
@@ -50,6 +52,12 @@ export class Game {
     this.hud.hide();
     this.events.emit("state:changed", this.state);
     this.events.emit("run:started", null);
+  }
+
+  setDashEnergy(value) {
+    if (value === this.dashEnergy) return;
+    this.dashEnergy = value;
+    this.events.emit("dash:energy-changed", this.dashEnergy);
   }
 
   endRun() {
@@ -83,19 +91,41 @@ export class Game {
       );
 
       this.player.handleInput(this.input);
-      this.player.update(dt);
-      this.world.update(dt, this.speed);
-      this.obstacles.update(dt, this.speed);
-      this.coins.update(dt, this.speed);
-      this.score.addDistance(this.speed * dt);
 
-      const hit = this.collisions.checkObstacleHit(
+      // Dash: needs a full meter, fires a timed burst (Shift).
+      if (
+        this.input.consume("dash") &&
+        this.dashEnergy >= 1 - 1e-9 &&
+        !this.player.dashing
+      ) {
+        this.setDashEnergy(0);
+        this.player.startDash(CONFIG.dash.duration);
+        this.events.emit("player:dashed", null);
+      }
+
+      this.player.update(dt);
+      const effectiveSpeed = this.player.dashing
+        ? this.speed * CONFIG.dash.speedMultiplier
+        : this.speed;
+      this.world.update(dt, effectiveSpeed);
+      this.obstacles.update(dt, effectiveSpeed);
+      this.coins.update(dt, effectiveSpeed);
+      this.score.addDistance(effectiveSpeed * dt);
+
+      const hits = this.collisions.findObstacleHits(
         this.player,
         this.obstacles.getActive()
       );
-      if (hit) {
+      if (hits.length > 0 && !this.player.dashing) {
         this.endRun();
       } else {
+        // Dashing smashes through anything in the way.
+        for (const index of hits) {
+          this.obstacles.smash(index);
+          this.score.addBonus(CONFIG.dash.smashBonus);
+          this.events.emit("obstacle:smashed", null);
+        }
+
         const collected = this.collisions.collectCoins(
           this.player,
           this.coins.getActive()
@@ -103,6 +133,9 @@ export class Game {
         for (const index of collected) {
           this.coins.collect(index);
           this.score.addCoin();
+          this.setDashEnergy(
+            Math.min(1, this.dashEnergy + CONFIG.dash.energyPerCoin)
+          );
           this.events.emit("coin:collected", null);
         }
       }

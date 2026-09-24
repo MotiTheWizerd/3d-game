@@ -10,7 +10,9 @@ import { CONFIG } from "../config.js";
  * Events consumed:
  *   player:jumped    -> jump blip
  *   player:lane      -> lane tick
+ *   player:dashed    -> dash whoosh
  *   coin:collected   -> coin ping
+ *   obstacle:smashed -> smash thud
  *   run:started      -> start jingle
  *   run:ended        -> crash (+ best-score chime when isNewBest)
  *   audio:toggle-requested -> flips mute (from HUD button)
@@ -198,6 +200,66 @@ export class AudioManager {
     const t = this.ctx.currentTime;
     this.note(t, 987.77, 0.09, "square", 0.25);
     this.note(t + 0.085, 1318.51, 0.24, "square", 0.25);
+  }
+
+  playDash() {
+    if (!this.ensureContext() || this.muted) return;
+    const t = this.ctx.currentTime;
+
+    // Band-passed noise sweeping upward — the rush of air.
+    const noise = this.ctx.createBufferSource();
+    noise.buffer = this.noiseBuffer;
+    const filter = this.ctx.createBiquadFilter();
+    filter.type = "bandpass";
+    filter.Q.value = 1.2;
+    filter.frequency.setValueAtTime(400, t);
+    filter.frequency.exponentialRampToValueAtTime(2600, t + 0.3);
+    const noiseGain = this.ctx.createGain();
+    noiseGain.gain.setValueAtTime(0.0001, t);
+    noiseGain.gain.exponentialRampToValueAtTime(0.35, t + 0.05);
+    noiseGain.gain.exponentialRampToValueAtTime(0.0001, t + 0.35);
+    noise.connect(filter).connect(noiseGain).connect(this.master);
+    noise.start(t);
+    noise.stop(t + 0.4);
+
+    // Rising saw underneath — the "ignite".
+    this.sweep({
+      type: "sawtooth",
+      from: 160,
+      to: 520,
+      duration: 0.25,
+      volume: 0.18,
+    });
+  }
+
+  playSmash() {
+    if (!this.ensureContext() || this.muted) return;
+    const t = this.ctx.currentTime;
+
+    // Short bright noise burst — the shatter.
+    const noise = this.ctx.createBufferSource();
+    noise.buffer = this.noiseBuffer;
+    const filter = this.ctx.createBiquadFilter();
+    filter.type = "highpass";
+    filter.frequency.value = 900;
+    const noiseGain = this.ctx.createGain();
+    noiseGain.gain.setValueAtTime(0.3, t);
+    noiseGain.gain.exponentialRampToValueAtTime(0.0001, t + 0.18);
+    noise.connect(filter).connect(noiseGain).connect(this.master);
+    noise.start(t);
+    noise.stop(t + 0.2);
+
+    // Square drop — the punch.
+    const osc = this.ctx.createOscillator();
+    const oscGain = this.ctx.createGain();
+    osc.type = "square";
+    osc.frequency.setValueAtTime(220, t);
+    osc.frequency.exponentialRampToValueAtTime(80, t + 0.14);
+    oscGain.gain.setValueAtTime(0.3, t);
+    oscGain.gain.exponentialRampToValueAtTime(0.0001, t + 0.18);
+    osc.connect(oscGain).connect(this.master);
+    osc.start(t);
+    osc.stop(t + 0.2);
   }
 
   playStart() {

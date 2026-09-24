@@ -98,3 +98,19 @@ test("collectCoins with nothing in range returns empty", () => {
   const coins = [fakeCoin(CONFIG.lanes[0], CONFIG.coins.y, 0)];
   assert.deepEqual(sys.collectCoins(player, coins), []);
 });
+
+test("findObstacleHits returns indices of every overlapping obstacle", () => {
+  const player = fakePlayer(0, CONFIG.player.restY);
+  const obstacles = [
+    fakeObstacle(0, 1.0),   // different lane — miss
+    fakeObstacle(1, 1.4),   // same lane — hit
+    fakeObstacle(2, 2.6),   // different lane — miss
+    fakeObstacle(1, 1.0, 0.5), // same lane, in Z reach — hit
+  ];
+  assert.deepEqual(sys.findObstacleHits(player, obstacles), [1, 3]);
+});
+
+test("findObstacleHits with nothing overlapping returns empty", () => {
+  const player = fakePlayer(0, CONFIG.player.restY);
+  assert.deepEqual(sys.findObstacleHits(player, [fakeObstacle(0, 2.6)]), []);
+});

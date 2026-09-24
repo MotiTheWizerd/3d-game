@@ -50,6 +50,14 @@ export const CONFIG = {
     packSpacing: 1.4,
   },
 
+  dash: {
+    // Shift bursts through obstacles; energy fills from coins (4 coins = full).
+    duration: 1.2,
+    speedMultiplier: 1.6,
+    energyPerCoin: 0.25,
+    smashBonus: 25,
+  },
+
   score: {
     distanceScale: 1,
     bestKey: "neon-runner-best",
@@ -66,6 +74,8 @@ export const CONFIG = {
     obstacle: 0xff2d55,
     obstacleAlt: 0xff7a45,
     coin: 0xffd60a,
+    dashEnergy: 0x00e5ff,
+    dashReady: 0xb04dff,
     ground: 0x0d0d1c,
     groundEdge: 0x1a1a35,
     dash: 0x3d3d7a,

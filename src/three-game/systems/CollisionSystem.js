@@ -43,14 +43,20 @@ function coinBounds(mesh) {
 }
 
 export class CollisionSystem {
-  checkObstacleHit(player, obstacles) {
+  /** Indices into `obstacles` that currently overlap the player. */
+  findObstacleHits(player, obstacles) {
     const pb = player.getBounds();
-    for (const obstacle of obstacles) {
-      if (overlaps(pb, obstacleBounds(obstacle))) {
-        return true;
+    const hits = [];
+    for (let i = 0; i < obstacles.length; i++) {
+      if (overlaps(pb, obstacleBounds(obstacles[i]))) {
+        hits.push(i);
       }
     }
-    return false;
+    return hits;
+  }
+
+  checkObstacleHit(player, obstacles) {
+    return this.findObstacleHits(player, obstacles).length > 0;
   }
 
   collectCoins(player, coins) {
