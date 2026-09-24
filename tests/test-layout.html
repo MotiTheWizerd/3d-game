@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Layout Test</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #0f0f23; color: #e0e0e0; min-height: 100vh; }
+        .app-container { display: flex; min-height: 100vh; }
+        .sidebar { width: 240px; background: linear-gradient(180deg, #1a1a3e, #0d0d2b); padding: 2rem 1.5rem; display: flex; flex-direction: column; gap: 0.5rem; border-right: 1px solid rgba(255,255,255,0.06); }
+        .sidebar h2 { font-size: 1.1rem; color: #8b5cf6; margin-bottom: 1rem; letter-spacing: 0.5px; }
+        .nav-item { padding: 0.75rem 1rem; border-radius: 8px; cursor: pointer; transition: all 0.2s ease; font-size: 0.95rem; }
+        .nav-item:hover { background: rgba(139,92,246,0.15); color: #a78bfa; transform: translateX(4px); }
+        .nav-item.active { background: rgba(139,92,246,0.25); color: #c4b5fd; }
+        .main-content { flex: 1; padding: 2rem; }
+        .main-content h1 { font-size: 2rem; margin-bottom: 0.5rem; }
+        .subtitle { color: #9ca3af; margin-bottom: 2rem; }
+        .card-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 1.5rem; margin-bottom: 2rem; }
+        .card { background: linear-gradient(145deg, #1e1e3f, #151530); border-radius: 12px; padding: 1.5rem; border: 1px solid rgba(255,255,255,0.05); transition: all 0.3s ease; position: relative; overflow: hidden; }
+        .card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: linear-gradient(90deg, #8b5cf6, #06b6d4); opacity: 0; transition: opacity 0.3s ease; }
+        .card:hover { transform: translateY(-4px); box-shadow: 0 12px 40px rgba(139,92,246,0.15); border-color: rgba(139,92,246,0.2); }
+        .card:hover::before { opacity: 1; }
+        .card-icon { width: 48px; height: 48px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; margin-bottom: 1rem; }
+        .card-icon.purple { background: rgba(139,92,246,0.2); }
+        .card-icon.cyan { background: rgba(6,182,212,0.2); }
+        .card-icon.pink { background: rgba(236,72,153,0.2); }
+        .card-icon.green { background: rgba(34,197,94,0.2); }
+        .card h3 { font-size: 1.1rem; margin-bottom: 0.5rem; }
+        .card p { font-size: 0.9rem; color: #9ca3af; line-height: 1.5; }
+        .stats-row { display: flex; gap: 1rem; margin-bottom: 2rem; }
+        .stat-box { flex: 1; background: linear-gradient(145deg, #1a1a3e, #12122a); border-radius: 10px; padding: 1.25rem; text-align: center; border: 1px solid rgba(255,255,255,0.04); }
+        .stat-box .value { font-size: 2rem; font-weight: 700; background: linear-gradient(90deg, #8b5cf6, #06b6d4); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .stat-box .label { font-size: 0.85rem; color: #6b7280; margin-top: 0.25rem; }
+        @media (max-width: 768px) {
+            .app-container { flex-direction: column; }
+            .sidebar { width: 100%; flex-direction: row; overflow-x: auto; padding: 1rem; }
+            .card-grid { grid-template-columns: 1fr; }
+            .stats-row { flex-wrap: wrap; }
+            .stat-box { flex: 1 1 calc(50% - 0.5rem); }
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <aside class="sidebar">
+            <h2>📊 Dashboard</h2>
+            <div class="nav-item active">Overview</div>
+            <div class="nav-item">Analytics</div>
+            <div class="nav-item">Reports</div>
+            <div class="nav-item">Settings</div>
+            <div class="nav-item">Help</div>
+        </aside>
+        <main class="main-content">
+            <h1>Welcome Back</h1>
+            <p class="subtitle">Here's what's happening today.</p>
+            <div class="stats-row">
+                <div class="stat-box"><div class="value">1,234</div><div class="label">Total Users</div></div>
+                <div class="stat-box"><div class="value">$8,432</div><div class="label">Revenue</div></div>
+                <div class="stat-box"><div class="value">98.5%</div><div class="label">Uptime</div></div>
+            </div>
+            <div class="card-grid">
+                <div class="card">
+                    <div class="card-icon purple">⚡</div>
+                    <h3>Performance</h3>
+                    <p>System running at optimal levels with low latency across all services.</p>
+                </div>
+                <div class="card">
+                    <div class="card-icon cyan">🔒</div>
+                    <h3>Security</h3>
+                    <p>All security checks passed. Zero vulnerabilities detected this week.</p>
+                </div>
+                <div class="card">
+                    <div class="card-icon pink">❤️</div>
+                    <h3>Engagement</h3>
+                    <p>User engagement up 23% compared to last month's average metrics.</p>
+                </div>
+                <div class="card">
+                    <div class="card-icon green">🌱</div>
+                    <h3>Growth</h3>
+                    <p>New signups trending upward. On track to hit quarterly targets.</p>
+                </div>
+            </div>
+        </main>
+    </div>
+</body>
+</html>

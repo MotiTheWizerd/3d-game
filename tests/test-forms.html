@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Forms Test</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #0f0f23; color: #e0e0e0; min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 2rem; }
+        .form-card { background: linear-gradient(145deg, rgba(30,30,63,0.8), rgba(21,21,48,0.6)); backdrop-filter: blur(20px); border-radius: 16px; padding: 2.5rem; width: 100%; max-width: 480px; border: 1px solid rgba(139,92,246,0.15); box-shadow: 0 20px 60px rgba(0,0,0,0.3); }
+        .form-card h2 { font-size: 1.5rem; margin-bottom: 0.5rem; background: linear-gradient(90deg, #8b5cf6, #06b6d4); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .form-card .desc { color: #9ca3af; font-size: 0.9rem; margin-bottom: 2rem; }
+        .form-group { margin-bottom: 1.5rem; }
+        .form-group label { display: block; font-size: 0.9rem; color: #c4b5fd; margin-bottom: 0.5rem; font-weight: 500; }
+        .form-group input[type="text"], .form-group input[type="email"], .form-group select, .form-group textarea { width: 100%; padding: 0.75rem 1rem; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: #e0e0e0; font-size: 0.95rem; font-family: inherit; transition: all 0.2s ease; }
+        .form-group input:focus, .form-group select:focus, .form-group textarea:focus { outline: none; border-color: #8b5cf6; box-shadow: 0 0 0 3px rgba(139,92,246,0.2); }
+        .form-group select { appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%239ca3af' d='M6 8L1 3h10z'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 1rem center; padding-right: 2.5rem; }
+        .form-group textarea { resize: vertical; min-height: 100px; }
+        .radio-group { display: flex; gap: 1.5rem; }
+        .radio-option { display: flex; align-items: center; gap: 0.5rem; cursor: pointer; }
+        .radio-option input[type="radio"] { accent-color: #8b5cf6; width: 16px; height: 16px; }
+        .range-wrapper { display: flex; align-items: center; gap: 1rem; }
+        .range-wrapper input[type="range"] { flex: 1; accent-color: #8b5cf6; height: 6px; }
+        .range-value { background: rgba(139,92,246,0.2); padding: 0.25rem 0.75rem; border-radius: 6px; font-size: 0.85rem; color: #c4b5fd; min-width: 50px; text-align: center; }
+        .submit-btn { width: 100%; padding: 0.85rem; background: linear-gradient(90deg, #8b5cf6, #7c3aed); border: none; border-radius: 8px; color: white; font-size: 1rem; font-weight: 600; cursor: pointer; transition: all 0.2s ease; }
+        .submit-btn:hover { background: linear-gradient(90deg, #a78bfa, #8b5cf6); transform: translateY(-1px); box-shadow: 0 6px 20px rgba(139,92,246,0.3); }
+        .submit-btn:active { transform: translateY(0); }
+    </style>
+</head>
+<body>
+    <div class="form-card">
+        <h2>Create Account</h2>
+        <p class="desc">Fill in your details to get started.</p>
+        <form onsubmit="event.preventDefault(); alert('Submitted!');">
+            <div class="form-group">
+                <label for="fullname">Full Name</label>
+                <input type="text" id="fullname" placeholder="John Doe">
+            </div>
+            <div class="form-group">
+                <label for="email">Email Address</label>
+                <input type="email" id="email" placeholder="john@example.com">
+            </div>
+            <div class="form-group">
+                <label for="role">Role</label>
+                <select id="role">
+                    <option value="">Select a role...</option>
+                    <option value="developer">Developer</option>
+                    <option value="designer">Designer</option>
+                    <option value="manager">Manager</option>
+                    <option value="other">Other</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Bio</label>
+                <textarea id="bio" placeholder="Tell us about yourself..."></textarea>
+            </div>
+            <div class="form-group">
+                <label>Experience Level</label>
+                <div class="radio-group">
+                    <label class="radio-option"><input type="radio" name="level" value="junior"> Junior</label>
+                    <label class="radio-option"><input type="radio" name="level" value="mid"> Mid-Level</label>
+                    <label class="radio-option"><input type="radio" name="level" value="senior"> Senior</label>
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Availability (hrs/week)</label>
+                <div class="range-wrapper">
+                    <input type="range" id="availability" min="0" max="80" value="40" oninput="document.getElementById('avail-val').textContent = this.value">
+                    <span class="range-value" id="avail-val">40</span>
+                </div>
+            </div>
+            <button type="submit" class="submit-btn">Create Account</button>
+        </form>
+    </div>
+</body>
+</html>

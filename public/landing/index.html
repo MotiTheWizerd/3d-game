@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Nova — a sample landing page">
+  <title>Nova — Build Faster</title>
+  <link rel="icon" href="assets/logo.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/components.css">
+</head>
+<body>
+  <header class="nav" id="nav">
+    <div class="container nav__inner">
+      <a href="#" class="nav__brand">
+        <img src="assets/logo.svg" alt="" width="28" height="28">
+        <span>Nova</span>
+      </a>
+      <button class="nav__toggle" id="navToggle" aria-label="Toggle menu" aria-expanded="false">☰</button>
+      <nav class="nav__links" id="navLinks">
+        <a href="#features">Features</a>
+        <a href="#pricing">Pricing</a>
+        <a href="#contact">Contact</a>
+        <a href="#contact" class="btn btn--small">Get started</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div class="container hero__inner reveal">
+        <h1 class="hero__title">Build faster.<br><span class="gradient-text">Ship smarter.</span></h1>
+        <p class="hero__subtitle">Nova is the placeholder product that does everything and nothing, beautifully.</p>
+        <div class="hero__actions">
+          <a href="#pricing" class="btn">Start free trial</a>
+          <a href="#features" class="btn btn--ghost">Learn more</a>
+        </div>
+        <ul class="stats">
+          <li><strong data-count="12000">0</strong><span>Users</span></li>
+          <li><strong data-count="99">0</strong><span>% Uptime</span></li>
+          <li><strong data-count="42">0</strong><span>Integrations</span></li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="section" id="features">
+      <div class="container">
+        <h2 class="section__title reveal">Features</h2>
+        <div class="grid grid--3">
+          <article class="card reveal"><div class="card__icon">⚡</div><h3>Lightning fast</h3><p>Loads before you even click. Probably.</p></article>
+          <article class="card reveal"><div class="card__icon">🔒</div><h3>Secure by default</h3><p>Locked down tighter than a sandbox allowlist.</p></article>
+          <article class="card reveal"><div class="card__icon">🧩</div><h3>Modular</h3><p>Split across many files, just like this page.</p></article>
+        </div>
+      </div>
+    </section>
+
+    <section class="section section--alt" id="pricing">
+      <div class="container">
+        <h2 class="section__title reveal">Pricing</h2>
+        <div class="billing-toggle reveal">
+          <span>Monthly</span>
+          <button class="switch" id="billingSwitch" role="switch" aria-checked="false" aria-label="Toggle yearly billing"></button>
+          <span>Yearly <em>(-20%)</em></span>
+        </div>
+        <div class="grid grid--3">
+          <article class="card price reveal"><h3>Starter</h3><p class="price__amount" data-monthly="0" data-yearly="0">$0</p><p>For tinkering.</p><a href="#contact" class="btn btn--ghost">Choose</a></article>
+          <article class="card price price--featured reveal"><h3>Pro</h3><p class="price__amount" data-monthly="19" data-yearly="15">$19</p><p>For shipping.</p><a href="#contact" class="btn">Choose</a></article>
+          <article class="card price reveal"><h3>Team</h3><p class="price__amount" data-monthly="49" data-yearly="39">$49</p><p>For scaling.</p><a href="#contact" class="btn btn--ghost">Choose</a></article>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="contact">
+      <div class="container container--narrow">
+        <h2 class="section__title reveal">Stay in the loop</h2>
+        <form class="form reveal" id="signupForm" novalidate>
+          <input type="email" id="email" placeholder="you@example.com" required aria-label="Email address">
+          <button type="submit" class="btn">Subscribe</button>
+        </form>
+        <p class="form__message" id="formMessage" role="status"></p>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="container">© <span id="year"></span> Nova. A test page — content doesn't matter.</div>
+  </footer>
+
+  <script src="js/animations.js"></script>
+  <script src="js/main.js"></script>
+</body>
+</html>

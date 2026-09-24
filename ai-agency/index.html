@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>NeuralForge — AI Agency</title>
+    <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+    <!-- ====== NAVBAR ====== -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="#" class="logo">
+                <span class="logo-icon">&#9670;</span>
+                NeuralForge
+            </a>
+            <ul class="nav-links" id="navLinks">
+                <li><a href="#hero" class="active">Home</a></li>
+                <li><a href="#about">About</a></li>
+                <li><a href="#contact">Contact</a></li>
+            </ul>
+            <button class="hamburger" id="hamburger" aria-label="Menu">
+                <span></span><span></span><span></span>
+            </button>
+        </div>
+    </nav>
+
+    <!-- ====== HERO ====== -->
+    <section class="hero" id="hero">
+        <div class="hero-bg-shapes">
+            <div class="shape shape-1"></div>
+            <div class="shape shape-2"></div>
+            <div class="shape shape-3"></div>
+        </div>
+        <div class="hero-content">
+            <span class="badge">&#9889; AI-Powered Innovation</span>
+            <h1>We Build<br /><span class="gradient-text">Intelligent</span> Futures</h1>
+            <p>
+                From generative AI to intelligent automation — we partner with
+                forward-thinking businesses to design, deploy, and scale
+                transformative AI solutions.
+            </p>
+            <div class="hero-buttons">
+                <a href="#contact" class="btn btn-primary">Start a Project</a>
+                <a href="#about" class="btn btn-outline">Learn More</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- ====== ABOUT US ====== -->
+    <section class="about section" id="about">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-tag">About Us</span>
+                <h2>Where Vision Meets<br /><span class="gradient-text">Machine Intelligence</span></h2>
+                <p>
+                    We are a tight-knit team of AI researchers, engineers, and
+                    designers who believe intelligence should be accessible,
+                    ethical, and impactful.
+                </p>
+            </div>
+
+            <div class="about-grid">
+                <div class="about-card">
+                    <div class="card-icon">&#9733;</div>
+                    <h3>Our Mission</h3>
+                    <p>
+                        Democratize advanced AI by building custom solutions
+                        that solve real-world problems — not just tech demos.
+                    </p>
+                </div>
+                <div class="about-card">
+                    <div class="card-icon">&#9881;</div>
+                    <h3>Our Process</h3>
+                    <p>
+                        Research-first, user-obsessed. We prototype fast,
+                        validate early, and ship production-grade models.
+                    </p>
+                </div>
+                <div class="about-card">
+                    <div class="card-icon">&#9741;</div>
+                    <h3>Our Values</h3>
+                    <p>
+                        Transparency, safety, and human-centered design guide
+                        every line of code and every model we train.
+                    </p>
+                </div>
+                <div class="about-card">
+                    <div class="card-icon">&#9737;</div>
+                    <h3>Our Impact</h3>
+                    <p>
+                        50+ deployed solutions across healthcare, fintech, and
+                        creative industries. 3x avg. efficiency gain for clients.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ====== CONTACT US ====== -->
+    <section class="contact section" id="contact">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-tag">Contact Us</span>
+                <h2>Let's <span class="gradient-text">Create</span> Together</h2>
+                <p>
+                    Have a project in mind? Want to explore how AI can transform
+                    your business? Drop us a message — we'd love to hear from you.
+                </p>
+            </div>
+
+            <div class="contact-wrapper">
+                <form class="contact-form" id="contactForm">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="name">Your Name</label>
+                            <input type="text" id="name" name="name" placeholder="Jane Doe" required />
+                        </div>
+                        <div class="form-group">
+                            <label for="email">Email Address</label>
+                            <input type="email" id="email" name="email" placeholder="jane@company.com" required />
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="subject">Subject</label>
+                        <input type="text" id="subject" name="subject" placeholder="AI Consultation" />
+                    </div>
+                    <div class="form-group">
+                        <label for="message">Message</label>
+                        <textarea id="message" name="message" rows="5" placeholder="Tell us about your project..." required></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-block">
+                        Send Message &#10140;
+                    </button>
+                </form>
+
+                <div class="contact-info">
+                    <div class="info-item">
+                        <span class="info-icon">&#9993;</span>
+                        <div>
+                            <h4>Email</h4>
+                            <a href="mailto:hello@neuralforge.ai">hello@neuralforge.ai</a>
+                        </div>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-icon">&#9742;</span>
+                        <div>
+                            <h4>Phone</h4>
+                            <a href="tel:+15551234567">+1 (555) 123-4567</a>
+                        </div>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-icon">&#9881;</span>
+                        <div>
+                            <h4>Location</h4>
+                            <p>San Francisco, CA</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ====== FOOTER ====== -->
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2026 NeuralForge. All rights reserved.</p>
+            <p class="footer-tagline">Crafted with &#9829; by the NeuralForge team</p>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>

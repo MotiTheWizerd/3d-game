@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Canvas Test</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #0f0f23; color: #e0e0e0; min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        .canvas-container { position: relative; border-radius: 16px; overflow: hidden; border: 1px solid rgba(139,92,246,0.2); box-shadow: 0 20px 60px rgba(0,0,0,0.4); }
+        canvas { display: block; background: #0a0a1a; cursor: crosshair; }
+        .fps-counter { position: absolute; top: 12px; right: 12px; background: rgba(0,0,0,0.6); padding: 6px 10px; border-radius: 6px; font-size: 0.8rem; color: #22c55e; font-family: monospace; }
+        .controls { position: absolute; bottom: 12px; left: 50%; transform: translateX(-50%); display: flex; gap: 8px; background: rgba(0,0,0,0.7); padding: 8px 12px; border-radius: 10px; backdrop-filter: blur(10px); }
+        .btn { padding: 6px 14px; border: none; border-radius: 6px; cursor: pointer; font-size: 0.85rem; font-weight: 500; transition: all 0.2s ease; }
+        .btn-shape { background: rgba(139,92,246,0.3); color: #c4b5fd; }
+        .btn-shape:hover { background: rgba(139,92,246,0.5); }
+        .btn-shape.active { background: #8b5cf6; color: white; }
+        .slider-group { display: flex; align-items: center; gap: 6px; }
+        .slider-group label { font-size: 0.8rem; color: #9ca3af; }
+        .slider-group input[type="range"] { width: 80px; accent-color: #8b5cf6; }
+        .info-bar { position: absolute; top: 12px; left: 12px; background: rgba(0,0,0,0.6); padding: 6px 10px; border-radius: 6px; font-size: 0.8rem; color: #9ca3af; }
+    </style>
+</head>
+<body>
+    <div class="canvas-container">
+        <canvas id="canvas" width="800" height="500"></canvas>
+        <div class="fps-counter" id="fps">FPS: --</div>
+        <div class="info-bar" id="shape-label">Shape: Circle</div>
+        <div class="controls">
+            <button class="btn btn-shape active" data-shape="circle">● Circle</button>
+            <button class="btn btn-shape" data-shape="square">■ Square</button>
+            <button class="btn btn-shape" data-shape="triangle">▲ Triangle</button>
+            <button class="btn btn-shape" data-shape="star">★ Star</button>
+            <div class="slider-group">
+                <label>Speed</label>
+                <input type="range" id="speed" min="1" max="10" value="5">
+            </div>
+            <div class="slider-group">
+                <label>Hue</label>
+                <input type="range" id="hue" min="0" max="360" value="260">
+            </div>
+            <div class="slider-group">
+                <label>Count</label>
+                <input type="range" id="count" min="20" max="300" value="100">
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        const fpsEl = document.getElementById('fps');
+        const shapeLabel = document.getElementById('shape-label');
+        
+        let particles = [];
+        let currentShape = 'circle';
+        let hueVal = 260;
+        let clickEffect = false;
+        let mouseX = -1, mouseY = -1;
+
+        class Particle {
+            constructor(x, y) {
+                this.x = x || Math.random() * canvas.width;
+                this.y = y || Math.random() * canvas.height;
+                this.vx = (Math.random() - 0.5) * 2;
+                this.vy = (Math.random() - 0.5) * 2;
+                this.radius = Math.random() * 4 + 2;
+                this.hue = hueVal + Math.random() * 40 - 20;
+            }
+
+            draw(speed) {
+                ctx.beginPath();
+                if (currentShape === 'circle') {
+                    ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+                } else if (currentShape === 'square') {
+                    ctx.rect(this.x - this.radius, this.y - this.radius, this.radius * 2, this.radius * 2);
+                } else if (currentShape === 'triangle') {
+                    const r = this.radius * 1.2;
+                    ctx.moveTo(this.x, this.y - r);
+                    ctx.lineTo(this.x + r, this.y + r);
+                    ctx.lineTo(this.x - r, this.y + r);
+                    ctx.closePath();
+                } else if (currentShape === 'star') {
+                    this.drawStar(this.x, this.y, 5, this.radius, this.radius * 0.5);
+                }
+                ctx.fillStyle = `hsla(${this.hue}, 80%, 65%, 0.8)`;
+                ctx.fill();
+            }
+
+            drawStar(cx, cy, spikes, outerR, innerR) {
+                let rot = Math.PI / 2 * 3, step = Math.PI / spikes;
+                ctx.moveTo(cx, cy - outerR);
+                for (let i = 0; i < spikes; i++) {
+                    ctx.lineTo(cx + Math.cos(rot) * outerR, cy + Math.sin(rot) * outerR);
+                    rot += step;
+                    ctx.lineTo(cx + Math.cos(rot) * innerR, cy + Math.sin(rot) * innerR);
+                    rot += step;
+                }
+                ctx.closePath();
+            }
+
+            move(speed) {
+                const spd = parseFloat(document.getElementById('speed').value) * 0.3;
+                this.x += this.vx * spd;
+                this.y += this.vy * spd;
+                if (this.x < 0 || this.x > canvas.width) this.vx *= -1;
+                if (this.y < 0 || this.y > canvas.height) this.vy *= -1;
+            }
+        }
+
+        function createParticles(n) {
+            particles = [];
+            for (let i = 0; i < n; i++) {
+                particles.push(new Particle());
+            }
+        }
+
+        function drawConnections(maxDist) {
+            for (let i = 0; i < particles.length; i++) {
+                for (let j = i + 1; j < particles.length; j++) {
+                    const dx = particles[i].x - particles[j].x;
+                    const dy = particles[i].y - particles[j].y;
+                    const dist = Math.sqrt(dx * dx + dy * dy);
+                    if (dist < maxDist) {
+                        ctx.beginPath();
+                        ctx.strokeStyle = `hsla(${hueVal}, 60%, 60%, ${1 - dist / maxDist})`;
+                        ctx.lineWidth = 0.5;
+                        ctx.moveTo(particles[i].x, particles[i].y);
+                        ctx.lineTo(particles[j].x, particles[j].y);
+                        ctx.stroke();
+                    }
+                }
+            }
+        }
+
+        // FPS tracking
+        let frameCount = 0, lastTime = performance.now(), fps = 0;
+        function updateFPS() {
+            frameCount++;
+            const now = performance.now();
+            if (now - lastTime >= 1000) {
+                fps = frameCount;
+                fpsEl.textContent = `FPS: ${fps}`;
+                frameCount = 0;
+                lastTime = now;
+            }
+        }
+
+        function animate() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // Background subtle gradient
+            const grad = ctx.createRadialGradient(canvas.width/2, canvas.height/2, 50, canvas.width/2, canvas.height/2, 400);
+            grad.addColorStop(0, `hsla(${hueVal}, 40%, 10%, 0.1)`);
+            grad.addColorStop(1, 'transparent');
+            ctx.fillStyle = grad;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            drawConnections(100);
+            particles.forEach(p => { p.move(); p.draw(); });
+            updateFPS();
+            requestAnimationFrame(animate);
+        }
+
+        // Click to relocate nearby particles
+        canvas.addEventListener('click', (e) => {
+            const rect = canvas.getBoundingClientRect();
+            const cx = e.clientX - rect.left;
+            const cy = e.clientY - rect.top;
+            particles.forEach(p => {
+                const dist = Math.hypot(p.x - cx, p.y - cy);
+                if (dist < 100) {
+                    p.x = cx + (Math.random() - 0.5) * 200;
+                    p.y = cy + (Math.random() - 0.5) * 200;
+                    p.vx = (Math.random() - 0.5) * 4;
+                    p.vy = (Math.random() - 0.5) * 4;
+                }
+            });
+        });
+
+        // Shape buttons
+        document.querySelectorAll('.btn-shape').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.btn-shape').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                currentShape = btn.dataset.shape;
+                shapeLabel.textContent = `Shape: ${btn.textContent.trim()}`;
+            });
+        });
+
+        // Sliders
+        document.getElementById('hue').addEventListener('input', (e) => {
+            hueVal = parseInt(e.target.value);
+            particles.forEach(p => p.hue = hueVal + Math.random() * 40 - 20);
+        });
+
+        document.getElementById('count').addEventListener('change', (e) => {
+            createParticles(parseInt(e.target.value));
+        });
+
+        // Init
+        createParticles(100);
+        animate();
+    </script>
+</body>
+</html>

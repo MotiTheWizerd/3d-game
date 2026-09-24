@@ -1,0 +1,23 @@
+{
+  "name": "3d-game-sandbox",
+  "version": "1.0.0",
+  "description": "IDE testing sandbox: todo app, snake, landing pages, and a Three.js endless runner",
+  "main": "index.html",
+  "type": "module",
+  "scripts": {
+    "start": "node scripts/serve.js",
+    "dev": "node scripts/serve.js",
+    "test": "node --test tests/three-game/*.test.js"
+  },
+  "keywords": [
+    "sandbox",
+    "threejs",
+    "game",
+    "vanilla-js"
+  ],
+  "author": "Moti",
+  "license": "MIT",
+  "dependencies": {
+    "three": "^0.169.0"
+  }
+}

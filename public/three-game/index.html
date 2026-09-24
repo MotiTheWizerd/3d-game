@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Neon Runner — 3D Game</title>
+  <link rel="stylesheet" href="./css/styles.css" />
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "/node_modules/three/build/three.module.js"
+    }
+  }
+  </script>
+</head>
+<body>
+  <div id="game-root"></div>
+
+  <div id="hud">
+    <div id="hud-top">
+      <div class="hud-stat">
+        <span class="hud-label">Score</span>
+        <span id="hud-score" class="hud-value">0</span>
+      </div>
+      <div class="hud-stat">
+        <span class="hud-label">Best</span>
+        <span id="hud-best" class="hud-value">0</span>
+      </div>
+      <div class="hud-stat">
+        <span class="hud-label">Coins</span>
+        <span id="hud-coins" class="hud-value">0</span>
+      </div>
+    </div>
+
+    <div id="overlay" class="overlay visible">
+      <div class="overlay-card">
+        <p class="overlay-kicker">3D SANDBOX</p>
+        <h1 id="overlay-title">Neon Runner</h1>
+        <p id="overlay-message">Dodge the blocks. Grab the coins. Don't stop.</p>
+        <p class="overlay-controls">
+          <kbd>←</kbd><kbd>→</kbd> or <kbd>A</kbd><kbd>D</kbd> lanes ·
+          <kbd>Space</kbd> jump
+        </p>
+        <button id="overlay-button" type="button">Start Run</button>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="../../src/three-game/main.js"></script>
+</body>
+</html>

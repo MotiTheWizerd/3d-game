@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Traffic Light Simulator</title>
+  <style>
+    body { font-family: system-ui, sans-serif; display: grid; place-items: center; min-height: 100vh; margin: 0; background: #f5f0e8; }
+    .pole { background: #2f2f2f; padding: 18px 14px; border-radius: 16px; display: flex; flex-direction: column; gap: 14px; }
+    .light { width: 70px; height: 70px; border-radius: 50%; background: #3a3a3a; transition: background .3s, box-shadow .3s; }
+    .light.red.on { background: #ff4444; box-shadow: 0 0 25px #ff4444; }
+    .light.yellow.on { background: #ffd23f; box-shadow: 0 0 25px #ffd23f; }
+    .light.green.on { background: #3ddc64; box-shadow: 0 0 25px #3ddc64; }
+    .state { margin-top: 20px; font-weight: 600; letter-spacing: .05em; text-align: center; }
+  </style>
+</head>
+<body>
+  <div>
+    <div class="pole">
+      <div class="light red" id="red"></div>
+      <div class="light yellow" id="yellow"></div>
+      <div class="light green" id="green"></div>
+    </div>
+    <p class="state" id="state">STOP</p>
+  </div>
+  <script>
+    const lights = { red: document.getElementById("red"), yellow: document.getElementById("yellow"), green: document.getElementById("green") };
+    const state = document.getElementById("state");
+    const cycle = [["red", 3000], ["yellow", 800], ["green", 3000], ["yellow", 800]];
+    let i = 0;
+    function tick() {
+      Object.values(lights).forEach(l => l.classList.remove("on"));
+      const [color, ms] = cycle[i];
+      lights[color].classList.add("on");
+      state.textContent =
+        color === "red" ? "STOP" : color === "yellow" ? "READY" : "GO";
+      i = (i + 1) % cycle.length;
+      setTimeout(tick, ms);
+    }
+    tick();
+  </script>
+</body>
+</html>

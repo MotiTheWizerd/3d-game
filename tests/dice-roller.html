@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dice Roller</title>
+  <style>
+    body { font-family: system-ui, sans-serif; display: grid; place-items: center; min-height: 100vh; margin: 0; background: #0f172a; color: #e2e8f0; }
+    .die { width: 120px; height: 120px; background: #fff; color: #0f172a; border-radius: 18px; display: grid; place-items: center; font-size: 3.5rem; font-weight: 800; box-shadow: 0 10px 30px rgba(0,0,0,.4); }
+    .die.rolling { animation: shake .4s infinite; }
+    @keyframes shake { 0%,100% { transform: rotate(0); } 25% { transform: rotate(-12deg); } 75% { transform: rotate(12deg); } }
+    button { margin-top: 24px; padding: .8rem 2rem; border: none; border-radius: 10px; background: #38bdf8; color: #0f172a; font-size: 1.1rem; font-weight: bold; cursor: pointer; }
+    .history { margin-top: 16px; font-size: .9rem; color: #94a3b8; min-height: 1.2em; }
+  </style>
+</head>
+<body>
+  <div style="text-align:center">
+    <div class="die" id="die">5</div>
+    <button onclick="roll()">Roll</button>
+    <p class="history" id="history"></p>
+  </div>
+  <script>
+    const die = document.getElementById("die");
+    const history = document.getElementById("history");
+    const rolls = [];
+    function roll() {
+      die.classList.add("rolling");
+      setTimeout(() => {
+        const value = 1 + Math.floor(Math.random() * 6);
+        die.textContent = value;
+        die.classList.remove("rolling");
+        rolls.unshift(value);
+        history.textContent = "History: " + rolls.slice(0, 8).join(" · ");
+      }, 400);
+    }
+  </script>
+</body>
+</html>

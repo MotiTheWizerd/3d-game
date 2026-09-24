@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Random Quote</title>
+  <style>
+    body { font-family: Georgia, serif; display: grid; place-items: center; min-height: 100vh; margin: 0; background: #1e1e2e; color: #cdd6f4; }
+    .card { max-width: 480px; padding: 2rem; border-radius: 12px; background: #313244; text-align: center; }
+    blockquote { font-size: 1.5rem; font-style: italic; margin: 0 0 1rem; }
+    button { padding: .6rem 1.2rem; border: none; border-radius: 8px; background: #89b4fa; color: #1e1e2e; font-weight: bold; cursor: pointer; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <blockquote id="quote">The best way to predict the future is to invent it.</blockquote>
+    <p id="author">— Alan Kay</p>
+    <button onclick="newQuote()">Another one</button>
+  </div>
+  <script>
+    const quotes = [
+      ["The only way to do great work is to love what you do.", "Steve Jobs"],
+      ["Simplicity is the ultimate sophistication.", "Leonardo da Vinci"],
+      ["Stay hungry, stay foolish.", "Steve Jobs"],
+      ["Talk is cheap. Show me the code.", "Linus Torvalds"],
+      ["First, solve the problem. Then, write the code.", "John Johnson"]
+    ];
+    function newQuote() {
+      const [text, author] = quotes[Math.floor(Math.random() * quotes.length)];
+      document.getElementById("quote").textContent = text;
+      document.getElementById("author").textContent = "— " + author;
+    }
+  </script>
+</body>
+</html>

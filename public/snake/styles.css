@@ -1,0 +1,104 @@
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+    background-size: 400% 400%;
+    animation: gradientShift 12s ease infinite;
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    overflow: hidden;
+}
+
+@keyframes gradientShift {
+    0%   { background-position: 0% 50%; }
+    50%  { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+.game-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 18px;
+    padding: 32px;
+    border-radius: 20px;
+    background: rgba(255, 255, 255, 0.06);
+    backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+}
+
+.title {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #fff;
+    text-shadow: 0 0 20px rgba(0, 255, 136, 0.5);
+    letter-spacing: 1px;
+}
+
+.score-bar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #ccc;
+    font-size: 1rem;
+}
+
+.score-value {
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: #00ff88;
+    text-shadow: 0 0 8px rgba(0, 255, 136, 0.4);
+    min-width: 32px;
+    text-align: center;
+    transition: transform 0.15s ease;
+}
+
+.score-value.bump {
+    transform: scale(1.3);
+}
+
+.best-label { color: #ffaa00; }
+.best       { color: #ffaa00; text-shadow: 0 0 8px rgba(255, 170, 0, 0.4); }
+
+canvas#board {
+    border-radius: 10px;
+    border: 2px solid rgba(0, 255, 136, 0.3);
+    box-shadow: 0 0 24px rgba(0, 255, 136, 0.15);
+    background: #1a1a2e;
+}
+
+.controls-info {
+    color: #888;
+    font-size: 0.85rem;
+    text-align: center;
+}
+
+.btn {
+    padding: 12px 36px;
+    border: none;
+    border-radius: 12px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    outline: none;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #00ff88, #00cc6a);
+    color: #0f0c29;
+    box-shadow: 0 4px 16px rgba(0, 255, 136, 0.3);
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 24px rgba(0, 255, 136, 0.5);
+}
+
+.btn-primary:active {
+    transform: translateY(0);
+}
