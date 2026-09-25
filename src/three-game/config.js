@@ -58,6 +58,44 @@ export const CONFIG = {
     smashBonus: 25,
   },
 
+  fx: {
+    // Particle presets (see systems/ParticleSystem.js): speed in units/s,
+    // life in seconds, gravity applied to vy, colors picked per particle.
+    particles: {
+      max: 600,
+      coin: {
+        count: 16, speed: 5.5, speedVariance: 0.5, life: 0.5, size: 0.14,
+        gravity: -7, upBias: 0.35, drag: 2,
+        colors: [0xffd60a, 0xfff3b0, 0xffffff],
+      },
+      smash: {
+        count: 28, speed: 10, speedVariance: 0.5, life: 0.7, size: 0.2,
+        gravity: -20, upBias: 0.55, drag: 1,
+        colors: [0xff4530, 0xff9f0a, 0xffd60a],
+      },
+      crash: {
+        count: 80, speed: 13, speedVariance: 0.5, life: 1.0, size: 0.26,
+        gravity: -24, upBias: 0.4, drag: 0.8,
+        colors: [0xff2d55, 0xff9f0a, 0xffe066],
+      },
+      trail: {
+        count: 2, speed: 3, speedVariance: 0.4, life: 0.3, size: 0.18,
+        gravity: 0, upBias: 0.1, drag: 1.5, emitInterval: 0.016,
+        colors: [0x00e5ff, 0x7c4dff],
+      },
+    },
+    camera: {
+      // Shake: trauma decays linearly, offset scales with trauma^2.
+      shakeMaxOffset: 0.4,
+      shakeMaxRoll: 0.07,
+      shakeDecay: 1.8,
+      shakeFrequency: 31,
+      // FOV punch on dash start, exponential ease back to base.
+      fovPunch: 9,
+      fovDecay: 6,
+    },
+  },
+
   score: {
     distanceScale: 1,
     bestKey: "neon-runner-best",

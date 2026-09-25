@@ -5,6 +5,8 @@ import { ObstacleSpawner } from "./ObstacleSpawner.js";
 import { CoinSpawner } from "./CoinSpawner.js";
 import { CollisionSystem } from "../systems/CollisionSystem.js";
 import { ScoreSystem } from "../systems/ScoreSystem.js";
+import { ParticleSystem } from "../systems/ParticleSystem.js";
+import { CameraFX } from "../systems/CameraFX.js";
 
 const STATE = {
   READY: "ready",
@@ -29,6 +31,8 @@ export class Game {
     this.coins = new CoinSpawner(engine.scene);
     this.collisions = new CollisionSystem();
     this.score = new ScoreSystem(events);
+    this.particles = new ParticleSystem(engine.scene, events);
+    this.cameraFX = new CameraFX(engine.camera, events);
 
     this.hud.onButton = () => this.requestStart();
     this.hud.showReady(this.score.best);
@@ -49,6 +53,8 @@ export class Game {
     this.obstacles.reset();
     this.coins.reset();
     this.score.reset();
+    this.particles.reset();
+    this.cameraFX.reset();
     this.hud.hide();
     this.events.emit("state:changed", this.state);
     this.events.emit("run:started", null);
@@ -62,6 +68,9 @@ export class Game {
 
   endRun() {
     if (this.state !== STATE.PLAYING) return;
+    // Crash juice fires before the bookkeeping so the debris is already
+    // flying while the HUD comes up.
+    this.events.emit("player:crashed", { position: this.player.position.clone() });
     this.state = STATE.GAME_OVER;
     this.player.setActive(false);
     const previousBest = this.score.best;
@@ -110,6 +119,9 @@ export class Game {
       this.world.update(dt, effectiveSpeed);
       this.obstacles.update(dt, effectiveSpeed);
       this.coins.update(dt, effectiveSpeed);
+      if (this.player.dashing) {
+        this.particles.trail(this.player.position, effectiveSpeed, dt);
+      }
       this.score.addDistance(effectiveSpeed * dt);
 
       const hits = this.collisions.findObstacleHits(
@@ -119,11 +131,14 @@ export class Game {
       if (hits.length > 0 && !this.player.dashing) {
         this.endRun();
       } else {
-        // Dashing smashes through anything in the way.
-        for (const index of hits) {
+        // Dashing smashes through anything in the way. Descend so the
+        // splice inside smash() can't shift later indices.
+        for (let i = hits.length - 1; i >= 0; i--) {
+          const index = hits[i];
+          const position = this.obstacles.getActive()[index].position.clone();
           this.obstacles.smash(index);
           this.score.addBonus(CONFIG.dash.smashBonus);
-          this.events.emit("obstacle:smashed", null);
+          this.events.emit("obstacle:smashed", { position });
         }
 
         const collected = this.collisions.collectCoins(
@@ -131,18 +146,24 @@ export class Game {
           this.coins.getActive()
         );
         for (const index of collected) {
+          // Capture the position before collect() recycles the mesh.
+          const position = this.coins.getActive()[index].position.clone();
           this.coins.collect(index);
           this.score.addCoin();
           this.setDashEnergy(
             Math.min(1, this.dashEnergy + CONFIG.dash.energyPerCoin)
           );
-          this.events.emit("coin:collected", null);
+          this.events.emit("coin:collected", { position });
         }
       }
     } else if (this.state === STATE.READY) {
       this.world.update(dt, CONFIG.speed.initial * 0.35);
       this.player.update(dt);
     }
+
+    // Juice decays even on the game-over screen (crash debris, shake).
+    this.particles.update(dt);
+    this.cameraFX.update(dt);
 
     this.input.endFrame();
   }
