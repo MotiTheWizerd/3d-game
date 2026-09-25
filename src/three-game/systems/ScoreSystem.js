@@ -5,6 +5,7 @@ export class ScoreSystem {
     this.events = events;
     this.distance = 0;
     this.coins = 0;
+    this.coinMultiplier = 1;
     this.best = this.loadBest();
   }
 
@@ -27,6 +28,7 @@ export class ScoreSystem {
   reset() {
     this.distance = 0;
     this.coins = 0;
+    this.coinMultiplier = 1;
     this.publish();
   }
 
@@ -36,7 +38,7 @@ export class ScoreSystem {
   }
 
   addCoin() {
-    this.coins += 1;
+    this.coins += this.coinMultiplier;
     this.publish();
   }
 

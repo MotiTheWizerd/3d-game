@@ -50,6 +50,40 @@ export const CONFIG = {
     packSpacing: 1.4,
   },
 
+  powerUps: {
+    // Spawning: every N seconds a power-up appears (increases over time).
+    spawnIntervalStart: 8,
+    spawnIntervalMin: 4,
+    rampSeconds: 120,
+    // Types and their properties.
+    types: {
+      shield: {
+        label: "🛡 Shield",
+        color: 0x00e5ff,
+        emissive: 0x005566,
+        halfSize: 0.6,
+        scale: 1.0,
+      },
+      magnet: {
+        label: "🧲 Magnet",
+        color: 0xff2d55,
+        emissive: 0x66001a,
+        halfSize: 0.5,
+        scale: 1.0,
+      },
+      score2x: {
+        label: "⭐ 2× Score",
+        color: 0xffd60a,
+        emissive: 0x665500,
+        halfSize: 0.55,
+        scale: 1.0,
+      },
+    },
+    // Active durations.
+    duration: 10,
+    // Magnet: extra pickup radius in units.
+    magnetRadius: 3.0,
+  },
   dash: {
     // Shift bursts through obstacles; energy fills from coins (4 coins = full).
     duration: 1.2,

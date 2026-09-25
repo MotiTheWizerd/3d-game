@@ -10,6 +10,7 @@ export class Player {
     this.grounded = true;
     this.active = true;
     this.dashTimer = 0;
+    this._magnetRadius = 0;
 
     const colors = CONFIG.colors;
     const geometry = new THREE.BoxGeometry(0.9, 1.1, 0.9);
@@ -36,6 +37,15 @@ export class Player {
 
   get dashing() {
     return this.dashTimer > 0;
+  }
+
+  /** Extra magnetic pickup radius (set by PowerUpSystem each frame). */
+  set magnetRadius(val) {
+    this._magnetRadius = val ?? 0;
+  }
+
+  get magnetRadius() {
+    return this._magnetRadius;
   }
 
   /** Called by the Game when a dash is triggered — the Player owns the feel. */
@@ -102,13 +112,14 @@ export class Player {
 
   getBounds() {
     const p = this.mesh.position;
+    const extra = this._magnetRadius ?? 0;
     return {
-      minX: p.x - CONFIG.player.halfWidth,
-      maxX: p.x + CONFIG.player.halfWidth,
+      minX: p.x - CONFIG.player.halfWidth - extra,
+      maxX: p.x + CONFIG.player.halfWidth + extra,
       minY: p.y - CONFIG.player.halfHeight,
       maxY: p.y + CONFIG.player.halfHeight,
-      minZ: p.z - CONFIG.player.halfDepth,
-      maxZ: p.z + CONFIG.player.halfDepth,
+      minZ: p.z - CONFIG.player.halfDepth - extra * 0.5,
+      maxZ: p.z + CONFIG.player.halfDepth + extra * 0.5,
     };
   }
 
@@ -118,6 +129,7 @@ export class Player {
     this.grounded = true;
     this.active = true;
     this.dashTimer = 0;
+    this._magnetRadius = 0;
     this.mesh.material.emissiveIntensity = 0.6;
     this.glow.intensity = 8;
     this.mesh.position.set(CONFIG.lanes[this.laneIndex], CONFIG.player.restY, 0);

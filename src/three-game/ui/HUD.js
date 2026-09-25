@@ -1,3 +1,5 @@
+import { CONFIG } from "../config.js";
+
 export class HUD {
   constructor(events) {
     this.events = events;
@@ -11,6 +13,8 @@ export class HUD {
     this.muteEl = document.getElementById("hud-mute");
     this.dashEl = document.getElementById("hud-dash");
     this.dashFillEl = document.getElementById("hud-dash-fill");
+    this.powerupEl = document.getElementById("hud-powerups");
+    this.powerupEls = {}; // type → { el }
 
     this.onButton = null;
     this.buttonEl.addEventListener("click", () => this.onButton?.());
@@ -36,6 +40,32 @@ export class HUD {
     this.events.on("dash:energy-changed", (energy) => {
       this.dashFillEl.style.width = `${Math.round(energy * 100)}%`;
       this.dashEl.classList.toggle("ready", energy >= 1 - 1e-9);
+    });
+
+    // Power-up indicators.
+    this.events.on("powerup:collected", ({ type }) => {
+      if (!this.powerupEls[type]) {
+        const el = document.createElement("div");
+        el.className = "hud-powerup";
+        el.textContent = CONFIG.powerUps.types[type].label;
+        this.powerupEl.appendChild(el);
+        this.powerupEls[type] = el;
+      }
+      const pe = this.powerupEls[type];
+      pe.style.opacity = "1";
+      pe.classList.add("active");
+    });
+
+    this.events.on("powerup:expired", ({ type }) => {
+      const pe = this.powerupEls[type];
+      if (pe) {
+        pe.classList.remove("active");
+        pe.style.opacity = "0";
+        setTimeout(() => {
+          if (pe.parentNode) pe.parentNode.removeChild(pe);
+          delete this.powerupEls[type];
+        }, 300);
+      }
     });
   }
 

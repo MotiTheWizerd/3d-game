@@ -115,6 +115,36 @@ body {
   animation: dash-pulse 0.8s ease-in-out infinite;
 }
 
+#hud-powerups {
+  position: absolute;
+  top: 106px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 8px;
+}
+
+.hud-powerup {
+  padding: 4px 14px;
+  border-radius: 999px;
+  background: rgba(12, 12, 28, 0.75);
+  border: 1px solid var(--panel-border);
+  backdrop-filter: blur(8px);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+  white-space: nowrap;
+  transition: opacity 0.3s ease, transform 0.3s ease;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(4px);
+}
+
+.hud-powerup.active {
+  opacity: 1;
+  transform: translateY(0);
+}
+
 @keyframes dash-pulse {
   0%,
   100% {
@@ -258,44 +288,44 @@ kbd {
   }
 
   #hud-dash {
-  position: absolute;
-  top: 84px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 340px;
-  max-width: 60vw;
-  height: 7px;
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.08);
-  border: 1px solid var(--panel-border);
-  overflow: hidden;
-}
-
-#hud-dash-fill {
-  width: 0%;
-  height: 100%;
-  border-radius: 999px;
-  background: linear-gradient(90deg, var(--accent-2), var(--accent));
-  transition: width 0.25s ease;
-}
-
-#hud-dash.ready #hud-dash-fill {
-  background: linear-gradient(90deg, var(--accent), var(--accent-2));
-  box-shadow: 0 0 12px var(--accent-2);
-  animation: dash-pulse 0.8s ease-in-out infinite;
-}
-
-@keyframes dash-pulse {
-  0%,
-  100% {
-    opacity: 1;
+    position: absolute;
+    top: 84px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 340px;
+    max-width: 60vw;
+    height: 7px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid var(--panel-border);
+    overflow: hidden;
   }
-  50% {
-    opacity: 0.55;
-  }
-}
 
-#hud-mute {
+  #hud-dash-fill {
+    width: 0%;
+    height: 100%;
+    border-radius: 999px;
+    background: linear-gradient(90deg, var(--accent-2), var(--accent));
+    transition: width 0.25s ease;
+  }
+
+  #hud-dash.ready #hud-dash-fill {
+    background: linear-gradient(90deg, var(--accent), var(--accent-2));
+    box-shadow: 0 0 12px var(--accent-2);
+    animation: dash-pulse 0.8s ease-in-out infinite;
+  }
+
+  @keyframes dash-pulse {
+    0%,
+    100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0.55;
+    }
+  }
+
+  #hud-mute {
     top: 12px;
     right: 12px;
     width: 40px;

@@ -69,4 +69,28 @@ export class CollisionSystem {
     }
     return collected.reverse();
   }
+
+  /** Indices into `powerUps` that currently overlap the player (reverse order for splicing). */
+  collectPowerUps(player, powerUps) {
+    function puBounds(mesh) {
+      const p = mesh.position;
+      const hs = CONFIG.powerUps.types[mesh.userData.type]?.halfSize ?? 0.5;
+      return {
+        minX: p.x - hs,
+        maxX: p.x + hs,
+        minY: p.y - hs,
+        maxY: p.y + hs,
+        minZ: p.z - hs,
+        maxZ: p.z + hs,
+      };
+    }
+    const pb = player.getBounds();
+    const collected = [];
+    for (let i = 0; i < powerUps.length; i++) {
+      if (overlaps(pb, puBounds(powerUps[i]))) {
+        collected.push(i);
+      }
+    }
+    return collected.reverse();
+  }
 }
