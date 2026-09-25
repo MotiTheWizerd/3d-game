@@ -1,5 +1,8 @@
 import { CONFIG } from "../config.js";
 
+const STEPS_PER_BAR = 16;
+const midiToFreq = (midi) => 440 * Math.pow(2, (midi - 69) / 12);
+
 /**
  * Synthesized sound effects via WebAudio — no audio assets.
  *
@@ -17,6 +20,11 @@ import { CONFIG } from "../config.js";
  *   run:ended        -> crash (+ best-score chime when isNewBest)
  *   audio:toggle-requested -> flips mute (from HUD button)
  *
+ * Music: a synthesized arp/bass loop (CONFIG.audio.music) starts on
+ *   run:started and fades out on run:ended. A 25ms lookahead scheduler
+ *   queues notes ~120ms ahead on the audio clock, so the loop survives
+ *   tab throttling and never drifts.
+ *
  * Events produced:
  *   audio:muted-changed { muted }
  */
@@ -31,14 +39,24 @@ export class AudioManager {
     this.noiseBuffer = null;
     this.muted = this.loadMuted();
 
+    // Background music loop state (headless-safe: no context -> no timer).
+    this.musicPlaying = false;
+    this.musicStep = 0;
+    this.nextNoteTime = 0;
+    this.musicTimer = null;
+
     this.subscriptions = [
       this.events.on("player:jumped", () => this.playJump()),
       this.events.on("player:lane", () => this.playLane()),
       this.events.on("coin:collected", () => this.playCoin()),
-      this.events.on("run:started", () => this.playStart()),
-      this.events.on("run:ended", ({ isNewBest } = {}) =>
-        this.playCrash(isNewBest)
-      ),
+      this.events.on("run:started", () => {
+        this.playStart();
+        this.startMusic();
+      }),
+      this.events.on("run:ended", ({ isNewBest } = {}) => {
+        this.playCrash(isNewBest);
+        this.stopMusic();
+      }),
       this.events.on("audio:toggle-requested", () => this.toggleMute()),
     ];
   }
@@ -98,6 +116,7 @@ export class AudioManager {
 
   /** Remove every bus subscription (for teardown/tests). */
   destroy() {
+    this.stopMusic();
     for (const off of this.subscriptions) off();
     this.subscriptions = [];
     this.detach();
@@ -122,6 +141,12 @@ export class AudioManager {
       this.master = this.ctx.createGain();
       this.master.gain.value = this.muted ? 0 : CONFIG.audio.masterVolume;
       this.master.connect(this.ctx.destination);
+
+      // Music bus — separate gain so the loop can fade in/out on its own.
+      this.musicGain = this.ctx.createGain();
+      this.musicGain.gain.value = CONFIG.audio.music.volume;
+      this.musicGain.connect(this.master);
+
       this.noiseBuffer = this.createNoiseBuffer();
     }
     if (this.ctx.state === "suspended") this.ctx.resume();
@@ -307,5 +332,108 @@ export class AudioManager {
         this.note(base + i * 0.09, freq, i === 3 ? 0.4 : 0.15, "sine", 0.25);
       });
     }
+  }
+
+  // ---- background music loop --------------------------------------------
+
+  /**
+   * Start the loop. State is set before the context check so the flags
+   * stay truthful even headless (no AudioContext -> no scheduler).
+   */
+  startMusic() {
+    this.musicPlaying = true;
+    this.musicStep = 0;
+    if (!this.ensureContext()) return;
+
+    const t = this.ctx.currentTime;
+    this.nextNoteTime = t + 0.05;
+    this.musicGain.gain.cancelScheduledValues(t);
+    this.musicGain.gain.setValueAtTime(0.0001, t);
+    this.musicGain.gain.setTargetAtTime(CONFIG.audio.music.volume, t, 0.25);
+    if (!this.musicTimer) {
+      this.musicTimer = setInterval(() => this.scheduleMusic(), 25);
+    }
+    this.scheduleMusic();
+  }
+
+  stopMusic() {
+    this.musicPlaying = false;
+    if (this.musicTimer) {
+      clearInterval(this.musicTimer);
+      this.musicTimer = null;
+    }
+    if (this.ctx && this.musicGain) {
+      const t = this.ctx.currentTime;
+      this.musicGain.gain.cancelScheduledValues(t);
+      this.musicGain.gain.setTargetAtTime(0.0001, t, 0.2);
+    }
+  }
+
+  /** Lookahead scheduler: keeps ~120ms of loop queued on the audio clock. */
+  scheduleMusic() {
+    if (!this.ctx || !this.musicPlaying) return;
+    const cfg = CONFIG.audio.music;
+    const stepSeconds = 60 / cfg.tempo / 4;
+    const totalSteps = STEPS_PER_BAR * cfg.chords.length;
+    while (this.nextNoteTime < this.ctx.currentTime + 0.12) {
+      this.scheduleMusicStep(this.musicStep, this.nextNoteTime);
+      this.nextNoteTime += stepSeconds;
+      this.musicStep = (this.musicStep + 1) % totalSteps;
+    }
+  }
+
+  scheduleMusicStep(step, time) {
+    const cfg = CONFIG.audio.music;
+    const inBar = step % STEPS_PER_BAR;
+    const chord = cfg.chords[Math.floor(step / STEPS_PER_BAR) % cfg.chords.length];
+
+    // Bass: root on every quarter, octave accent picking up the groove.
+    if (inBar % 4 === 0) {
+      this.musicNote(time, midiToFreq(chord.root), 0.42, "sawtooth", cfg.bassVolume, 420);
+    } else if (inBar === 7 || inBar === 15) {
+      this.musicNote(time, midiToFreq(chord.root + 12), 0.16, "sawtooth", cfg.bassVolume * 0.8, 420);
+    }
+
+    // Arp: a 16th-note run cycling through the chord tones.
+    const tone = chord.tones[cfg.arpOrder[inBar % cfg.arpOrder.length]];
+    this.musicNote(time, midiToFreq(tone), 0.11, "square", cfg.arpVolume);
+
+    // Closed hat on the off-beats for pulse.
+    if (inBar % 4 === 2) this.musicHat(time);
+  }
+
+  musicNote(start, freq, duration, type, volume, filterFreq = 0) {
+    const osc = this.ctx.createOscillator();
+    const gain = this.ctx.createGain();
+    osc.type = type;
+    osc.frequency.setValueAtTime(freq, start);
+    gain.gain.setValueAtTime(0.0001, start);
+    gain.gain.exponentialRampToValueAtTime(volume, start + 0.012);
+    gain.gain.exponentialRampToValueAtTime(0.0001, start + duration);
+    let tail = osc;
+    if (filterFreq) {
+      const filter = this.ctx.createBiquadFilter();
+      filter.type = "lowpass";
+      filter.frequency.value = filterFreq;
+      osc.connect(filter);
+      tail = filter;
+    }
+    tail.connect(gain).connect(this.musicGain);
+    osc.start(start);
+    osc.stop(start + duration + 0.02);
+  }
+
+  musicHat(start) {
+    const noise = this.ctx.createBufferSource();
+    noise.buffer = this.noiseBuffer;
+    const filter = this.ctx.createBiquadFilter();
+    filter.type = "highpass";
+    filter.frequency.value = 6000;
+    const gain = this.ctx.createGain();
+    gain.gain.setValueAtTime(CONFIG.audio.music.hatVolume, start);
+    gain.gain.exponentialRampToValueAtTime(0.0001, start + 0.04);
+    noise.connect(filter).connect(gain).connect(this.musicGain);
+    noise.start(start);
+    noise.stop(start + 0.05);
   }
 }

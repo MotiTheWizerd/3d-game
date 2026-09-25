@@ -135,6 +135,8 @@ test("playing every sound headless is a safe no-op", () => {
   audio.playStart();
   audio.playCrash();
   audio.playCrash(true);
+  audio.startMusic();
+  audio.stopMusic();
   assert.equal(audio.ctx, null);
 
   // Same for firing the real game events end to end.
@@ -176,4 +178,63 @@ test("M key toggles mute when attached; other keys do not", () => {
   audio.detach();
   assert.equal(target.listeners.size, 0);
   audio.destroy();
+});
+
+test("config exposes music loop tunables", () => {
+  const music = CONFIG.audio.music;
+  assert.equal(typeof music.tempo, "number");
+  assert.ok(music.tempo > 40 && music.tempo < 220);
+  assert.ok(music.volume > 0 && music.volume <= 1);
+  assert.ok(Array.isArray(music.chords) && music.chords.length >= 2);
+  for (const chord of music.chords) {
+    assert.equal(typeof chord.root, "number");
+    assert.ok(Array.isArray(chord.tones) && chord.tones.length >= 3);
+  }
+  assert.ok(Array.isArray(music.arpOrder) && music.arpOrder.length > 0);
+  for (const i of music.arpOrder) {
+    assert.ok(i < music.chords[0].tones.length);
+  }
+});
+
+test("run:started starts music, run:ended stops it (headless-safe)", () => {
+  const events = new EventBus();
+  const audio = new AudioManager(events, fakeStorage());
+
+  events.emit("run:started", null);
+  assert.equal(audio.musicPlaying, true);
+  assert.equal(audio.musicTimer, null); // no AudioContext -> no scheduler
+  assert.equal(audio.ctx, null);
+
+  events.emit("run:ended", { isNewBest: false });
+  assert.equal(audio.musicPlaying, false);
+
+  // Stopping again (or without a context) must stay harmless.
+  audio.stopMusic();
+  assert.equal(audio.musicPlaying, false);
+
+  audio.destroy();
+});
+
+test("a restart rewinds the loop to step zero", () => {
+  const events = new EventBus();
+  const audio = new AudioManager(events, fakeStorage());
+
+  audio.musicStep = 37;
+  events.emit("run:started", null);
+  assert.equal(audio.musicStep, 0);
+
+  audio.destroy();
+});
+
+test("destroy() clears the music scheduler", () => {
+  const events = new EventBus();
+  const audio = new AudioManager(events, fakeStorage());
+
+  audio.musicPlaying = true;
+  audio.musicTimer = 1234; // fake id; clearInterval ignores unknown ids
+  audio.destroy();
+
+  assert.equal(audio.musicTimer, null);
+  assert.equal(audio.musicPlaying, false);
+  assert.equal(events.listeners.get("run:started").size, 0);
 });

@@ -66,6 +66,22 @@ export const CONFIG = {
   audio: {
     masterVolume: 0.9,
     mutedKey: "neon-runner-muted",
+    // Background loop: i - VI - III - VII in A minor, arp + bass + hats.
+    // Roots/tones are midi numbers; the scheduler runs on a 25ms timer.
+    music: {
+      tempo: 132,
+      volume: 1.0,
+      bassVolume: 0.22,
+      arpVolume: 0.1,
+      hatVolume: 0.05,
+      chords: [
+        { root: 33, tones: [57, 60, 64, 69] }, // Am
+        { root: 29, tones: [53, 57, 60, 65] }, // F
+        { root: 36, tones: [60, 64, 67, 72] }, // C
+        { root: 31, tones: [55, 59, 62, 67] }, // G
+      ],
+      arpOrder: [0, 1, 2, 3, 0, 2, 1, 3],
+    },
   },
 
   colors: {
