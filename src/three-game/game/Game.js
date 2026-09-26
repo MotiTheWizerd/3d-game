@@ -13,6 +13,7 @@ import { CameraFX } from "../systems/CameraFX.js";
 const STATE = {
   READY: "ready",
   PLAYING: "playing",
+  PAUSED: "paused",
   GAME_OVER: "gameover",
 };
 
@@ -28,6 +29,9 @@ export class Game {
     this.dashEnergy = 0;
     this.elapsed = 0;
 
+    this.visibilityDoc = null;
+    this.onVisibilityChange = null;
+
     this.world = new World(engine.scene);
     this.player = new Player(engine.scene, events);
     this.obstacles = new ObstacleSpawner(engine.scene);
@@ -37,16 +41,96 @@ export class Game {
     this.particles = new ParticleSystem(engine.scene, events);
     this.cameraFX = new CameraFX(engine.camera, events);
     this.powerUps = new PowerUpSpawner(engine.scene);
-    this.powerUpSystem = new PowerUpSystem(events);
+    // Power-up durations run on GAME time, not wall time: `elapsed` only
+    // advances while playing, so a paused run can't bleed its timers away.
+    this.powerUpSystem = new PowerUpSystem(events, () => this.elapsed * 1000);
 
-    this.hud.onButton = () => this.requestStart();
+    this.hud.onButton = () => this.pressPrimaryButton();
+    this.hud.onRestart = () => this.pressRestartButton();
     this.hud.showReady(this.score.best);
     this.events.emit("state:changed", this.state);
   }
 
   requestStart() {
-    if (this.state === STATE.PLAYING) return;
+    if (this.state === STATE.PLAYING || this.state === STATE.PAUSED) return;
     this.startRun();
+  }
+
+  // ---- pause ------------------------------------------------------------
+
+  /**
+   * Freeze the run. Everything downstream of `update()` stops: the clock,
+   * the spawners, dash/power-up timers, particles and camera shake.
+   * Returns false when there is nothing to pause.
+   */
+  pause(reason = "manual") {
+    if (this.state !== STATE.PLAYING) return false;
+    this.state = STATE.PAUSED;
+    this.hud.showPaused(this.score.score);
+    this.events.emit("state:changed", this.state);
+    this.events.emit("run:paused", { reason });
+    return true;
+  }
+
+  resume() {
+    if (this.state !== STATE.PAUSED) return false;
+    this.state = STATE.PLAYING;
+    this.hud.hide();
+    // Drop keys pressed while paused so the run doesn't resume into a stale
+    // lane-change/jump burst.
+    this.input.endFrame();
+    this.events.emit("state:changed", this.state);
+    this.events.emit("run:resumed", null);
+    return true;
+  }
+
+  togglePause(reason = "manual") {
+    if (this.state === STATE.PAUSED) return this.resume();
+    return this.pause(reason);
+  }
+
+  get paused() {
+    return this.state === STATE.PAUSED;
+  }
+
+  /** Overlay button: Resume when paused, otherwise start a run. */
+  pressPrimaryButton() {
+    if (this.state === STATE.PAUSED) {
+      this.resume();
+      return;
+    }
+    this.requestStart();
+  }
+
+  /** Overlay "Restart": throw the current run away and begin a fresh one. */
+  pressRestartButton() {
+    if (this.state !== STATE.PAUSED) return false;
+    this.startRun();
+    return true;
+  }
+
+  /**
+   * Auto-pause when the tab goes away — a tab-switch mid-run shouldn't cost
+   * you the score. Pass a document-like object in tests.
+   */
+  attachVisibility(target = null) {
+    const doc = target ?? (typeof document !== "undefined" ? document : null);
+    if (!doc || this.visibilityDoc) return;
+    this.onVisibilityChange = () => {
+      if (doc.hidden && CONFIG.pause.autoOnHidden) this.pause("hidden");
+    };
+    doc.addEventListener("visibilitychange", this.onVisibilityChange);
+    this.visibilityDoc = doc;
+  }
+
+  detachVisibility() {
+    if (!this.visibilityDoc) return;
+    this.visibilityDoc.removeEventListener(
+      "visibilitychange",
+      this.onVisibilityChange
+    );
+    this.visibilityDoc = null;
+    this.onVisibilityChange = null;
   }
 
   startRun() {
@@ -101,6 +185,14 @@ export class Game {
   }
 
   update(dt) {
+    // Paused swallows the frame whole: no simulation, no juice decay, and no
+    // input except the resume key. The scene stays rendered, frozen.
+    if (this.state === STATE.PAUSED) {
+      if (this.input.consume("pause")) this.resume();
+      this.input.endFrame();
+      return;
+    }
+
     if (this.state !== STATE.PLAYING) {
       const started =
         this.input.consume("confirm") || this.input.consume("jump");
@@ -110,6 +202,12 @@ export class Game {
     }
 
     if (this.state === STATE.PLAYING) {
+      if (this.input.consume("pause")) {
+        this.pause();
+        this.input.endFrame();
+        return;
+      }
+
       this.elapsed += dt;
       this.speed = Math.min(
         CONFIG.speed.max,

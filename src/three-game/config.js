@@ -84,6 +84,11 @@ export const CONFIG = {
     // Magnet: extra pickup radius in units.
     magnetRadius: 3.0,
   },
+  pause: {
+    // Tab-switch / minimize auto-pauses a live run (manual: P or Esc).
+    autoOnHidden: true,
+  },
+
   dash: {
     // Shift bursts through obstacles; energy fills from coins (4 coins = full).
     duration: 1.2,

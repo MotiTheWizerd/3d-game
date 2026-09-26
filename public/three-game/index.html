@@ -46,9 +46,20 @@
         <p id="overlay-message">Dodge the blocks. Grab the coins. Don't stop.</p>
         <p class="overlay-controls">
           <kbd>←</kbd><kbd>→</kbd> or <kbd>A</kbd><kbd>D</kbd> lanes ·
-          <kbd>Space</kbd> jump · <kbd>Shift</kbd> dash · <kbd>M</kbd> mute
+          <kbd>Space</kbd> jump · <kbd>Shift</kbd> dash · <kbd>M</kbd> mute ·
+          <kbd>P</kbd> pause
         </p>
-        <button id="overlay-button" type="button">Start Run</button>
+        <div class="overlay-actions">
+          <button id="overlay-button" type="button">Start Run</button>
+          <button
+            id="overlay-restart"
+            type="button"
+            class="overlay-secondary"
+            title="Throw this run away and start over"
+          >
+            Restart Run
+          </button>
+        </div>
       </div>
     </div>
   </div>

@@ -9,6 +9,8 @@ const KEY_MAP = {
   ShiftLeft: "dash",
   ShiftRight: "dash",
   Enter: "confirm",
+  KeyP: "pause",
+  Escape: "pause",
 };
 
 export class InputManager {

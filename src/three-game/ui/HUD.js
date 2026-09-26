@@ -7,6 +7,7 @@ export class HUD {
     this.titleEl = document.getElementById("overlay-title");
     this.messageEl = document.getElementById("overlay-message");
     this.buttonEl = document.getElementById("overlay-button");
+    this.restartEl = document.getElementById("overlay-restart");
     this.scoreEl = document.getElementById("hud-score");
     this.bestEl = document.getElementById("hud-best");
     this.coinsEl = document.getElementById("hud-coins");
@@ -17,7 +18,9 @@ export class HUD {
     this.powerupEls = {}; // type → { el }
 
     this.onButton = null;
+    this.onRestart = null;
     this.buttonEl.addEventListener("click", () => this.onButton?.());
+    this.restartEl?.addEventListener("click", () => this.onRestart?.());
 
     // Mute is owned by AudioManager; the HUD only mirrors its state.
     this.muteEl.addEventListener("click", () => {
@@ -69,11 +72,17 @@ export class HUD {
     });
   }
 
+  /** "Restart Run" only belongs on the pause screen. */
+  setRestartVisible(visible) {
+    this.restartEl?.classList.toggle("visible", visible);
+  }
+
   showReady(best) {
     this.titleEl.textContent = "Neon Runner";
     this.messageEl.textContent = "Dodge the blocks. Grab the coins. Don't stop.";
     this.buttonEl.textContent = "Start Run";
     this.bestEl.textContent = String(best);
+    this.setRestartVisible(false);
     this.overlay.classList.add("visible");
   }
 
@@ -81,11 +90,24 @@ export class HUD {
     this.titleEl.textContent = "Run Over";
     this.messageEl.textContent = `Score ${score} · Best ${best}`;
     this.buttonEl.textContent = "Run Again";
+    this.setRestartVisible(false);
     this.overlay.classList.add("visible");
+  }
+
+  /** Pause screen: the primary button resumes, the ghost one restarts. */
+  showPaused(score) {
+    this.titleEl.textContent = "Paused";
+    this.messageEl.textContent = `Score ${score} — the track will wait.`;
+    this.buttonEl.textContent = "Resume";
+    this.setRestartVisible(true);
+    this.overlay.classList.add("visible");
+    document.body.classList.add("is-paused");
   }
 
   hide() {
     this.overlay.classList.remove("visible");
+    this.setRestartVisible(false);
+    document.body.classList.remove("is-paused");
     // Drop focus so Space/Enter don't re-click the button mid-run.
     this.buttonEl.blur();
   }

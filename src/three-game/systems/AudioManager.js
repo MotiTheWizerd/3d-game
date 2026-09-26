@@ -18,6 +18,8 @@ const midiToFreq = (midi) => 440 * Math.pow(2, (midi - 69) / 12);
  *   obstacle:smashed -> smash thud
  *   run:started      -> start jingle
  *   run:ended        -> crash (+ best-score chime when isNewBest)
+ *   run:paused       -> freeze the music loop where it stopped
+ *   run:resumed      -> pick the same groove back up
  *   audio:toggle-requested -> flips mute (from HUD button)
  *
  * Music: a synthesized arp/bass loop (CONFIG.audio.music) starts on
@@ -41,6 +43,7 @@ export class AudioManager {
 
     // Background music loop state (headless-safe: no context -> no timer).
     this.musicPlaying = false;
+    this.musicPaused = false;
     this.musicStep = 0;
     this.nextNoteTime = 0;
     this.musicTimer = null;
@@ -58,6 +61,10 @@ export class AudioManager {
         this.stopMusic();
       }),
       this.events.on("audio:toggle-requested", () => this.toggleMute()),
+      // Pause freezes the groove where it stopped (position kept for resume),
+      // so the loop doesn't run on behind an overlay that says "Paused".
+      this.events.on("run:paused", () => this.pauseMusic()),
+      this.events.on("run:resumed", () => this.resumeMusic()),
     ];
   }
 
@@ -341,8 +348,32 @@ export class AudioManager {
    * stay truthful even headless (no AudioContext -> no scheduler).
    */
   startMusic() {
-    this.musicPlaying = true;
     this.musicStep = 0;
+    this.beginMusicLoop();
+  }
+
+  /** Freeze the loop mid-bar; musicStep is kept so resume() picks the groove back up. */
+  pauseMusic() {
+    if (!this.musicPlaying) return;
+    this.musicPaused = true;
+    this.stopScheduler();
+    this.musicPlaying = false;
+    if (this.ctx && this.musicGain) {
+      const t = this.ctx.currentTime;
+      this.musicGain.gain.cancelScheduledValues(t);
+      this.musicGain.gain.setTargetAtTime(0.0001, t, 0.12);
+    }
+  }
+
+  resumeMusic() {
+    if (!this.musicPaused) return false;
+    this.musicPaused = false;
+    this.beginMusicLoop();
+    return true;
+  }
+
+  beginMusicLoop() {
+    this.musicPlaying = true;
     if (!this.ensureContext()) return;
 
     const t = this.ctx.currentTime;
@@ -356,12 +387,17 @@ export class AudioManager {
     this.scheduleMusic();
   }
 
-  stopMusic() {
-    this.musicPlaying = false;
+  stopScheduler() {
     if (this.musicTimer) {
       clearInterval(this.musicTimer);
       this.musicTimer = null;
     }
+  }
+
+  stopMusic() {
+    this.musicPaused = false;
+    this.musicPlaying = false;
+    this.stopScheduler();
     if (this.ctx && this.musicGain) {
       const t = this.ctx.currentTime;
       this.musicGain.gain.cancelScheduledValues(t);

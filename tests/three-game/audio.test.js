@@ -44,6 +44,8 @@ test("subscribes to every game event it reacts to", () => {
     "coin:collected",
     "run:started",
     "run:ended",
+    "run:paused",
+    "run:resumed",
     "audio:toggle-requested",
   ];
   for (const name of expected) {
@@ -222,6 +224,54 @@ test("a restart rewinds the loop to step zero", () => {
   audio.musicStep = 37;
   events.emit("run:started", null);
   assert.equal(audio.musicStep, 0);
+
+  audio.destroy();
+});
+
+test("run:paused freezes the loop, run:resumed picks the same groove back up", () => {
+  const events = new EventBus();
+  const audio = new AudioManager(events, fakeStorage());
+
+  events.emit("run:started", null);
+  audio.musicStep = 12; // mid-bar
+
+  events.emit("run:paused", { reason: "manual" });
+  assert.equal(audio.musicPlaying, false, "no music behind the overlay");
+  assert.equal(audio.musicPaused, true);
+  assert.equal(audio.musicStep, 12, "position survives — resume continues, not restarts");
+
+  events.emit("run:resumed", null);
+  assert.equal(audio.musicPlaying, true);
+  assert.equal(audio.musicPaused, false);
+  assert.equal(audio.musicStep, 12);
+
+  audio.destroy();
+});
+
+test("resuming music that was never paused is a no-op", () => {
+  const events = new EventBus();
+  const audio = new AudioManager(events, fakeStorage());
+
+  assert.equal(audio.resumeMusic(), false);
+  assert.equal(audio.musicPlaying, false);
+
+  audio.pauseMusic(); // nothing playing -> must not arm a phantom pause
+  assert.equal(audio.musicPaused, false);
+  assert.equal(audio.resumeMusic(), false);
+
+  audio.destroy();
+});
+
+test("run:ended wins: a stopped loop cannot be resumed back to life", () => {
+  const events = new EventBus();
+  const audio = new AudioManager(events, fakeStorage());
+
+  events.emit("run:started", null);
+  events.emit("run:paused", { reason: "manual" });
+  events.emit("run:ended", { isNewBest: false }); // crash straight from the overlay
+  assert.equal(audio.musicPaused, false, "stopMusic clears the pending resume");
+  assert.equal(audio.resumeMusic(), false);
+  assert.equal(audio.musicPlaying, false);
 
   audio.destroy();
 });

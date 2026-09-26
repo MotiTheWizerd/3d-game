@@ -21,12 +21,15 @@ function bootstrap() {
   audio.attach(window);
   audio.publishMuteState();
   const game = new Game({ engine, events, input, hud });
+  // Tab-switch / minimize shouldn't cost you a run.
+  game.attachVisibility();
 
   engine.onUpdate = (dt) => game.update(dt);
   engine.start();
 
   window.addEventListener("beforeunload", () => {
     input.detach();
+    game.detachVisibility();
     audio.destroy();
     engine.stop();
   });
