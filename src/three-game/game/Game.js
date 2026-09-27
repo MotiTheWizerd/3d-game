@@ -126,7 +126,12 @@ export class Game {
     const doc = target ?? (typeof document !== "undefined" ? document : null);
     if (!doc || this.visibilityDoc) return;
     this.onVisibilityChange = () => {
-      if (doc.hidden && CONFIG.pause.autoOnHidden) this.pause("hidden");
+      // Tab switches don't always deliver a window blur, so release held keys
+      // here too: the key you were riding when you left must be pressable when
+      // you come back.
+      if (!doc.hidden) return;
+      this.input?.releaseAll?.();
+      if (CONFIG.pause.autoOnHidden) this.pause("hidden");
     };
     doc.addEventListener("visibilitychange", this.onVisibilityChange);
     this.visibilityDoc = doc;

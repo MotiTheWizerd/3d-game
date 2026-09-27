@@ -25,16 +25,22 @@ export class InputManager {
 
     this.onKeyDown = this.onKeyDown.bind(this);
     this.onKeyUp = this.onKeyUp.bind(this);
+    this.onBlur = this.onBlur.bind(this);
   }
 
   attach() {
     this.target.addEventListener("keydown", this.onKeyDown);
     this.target.addEventListener("keyup", this.onKeyUp);
+    // Losing focus means the browser stops delivering keyup: hold Right,
+    // alt-tab, and `held` keeps "right" forever — the auto-repeat guard then
+    // ignores every future press of it. Blur is the only reliable notice.
+    this.target.addEventListener("blur", this.onBlur);
   }
 
   detach() {
     this.target.removeEventListener("keydown", this.onKeyDown);
     this.target.removeEventListener("keyup", this.onKeyUp);
+    this.target.removeEventListener("blur", this.onBlur);
   }
 
   onKeyDown(event) {
@@ -53,6 +59,19 @@ export class InputManager {
     const action = KEY_MAP[event.code];
     if (!action) return;
     this.held.delete(action);
+  }
+
+  onBlur() {
+    this.releaseAll();
+  }
+
+  /**
+   * Forget every key still marked down. The queue of discrete presses is left
+   * alone: `endFrame()` drops it, so this can't invent a movement the player
+   * never asked for.
+   */
+  releaseAll() {
+    this.held.clear();
   }
 
   /**
