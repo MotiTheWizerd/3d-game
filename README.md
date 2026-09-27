@@ -53,12 +53,24 @@ A modern, responsive todo application built with vanilla JavaScript, HTML, and C
 ## How to Run
 
 ```bash
-npm run dev
-# or
-python3 -m http.server 8000
+./run.sh          # serve the whole project on :8000
+./run.sh 8010     # ...or on another port
 ```
 
-Then open `http://localhost:8000/public/` in your browser.
+`run.sh` is the one-finger path: it checks the port isn't already taken, installs
+`three` once if `node_modules` is missing, prints the URL for your phone (same wifi),
+then hands over to `scripts/serve.js`.
+
+| page | url |
+| --- | --- |
+| Neon Runner (the game) | `http://localhost:8000/public/three-game/` |
+| Todo app | `http://localhost:8000/public/` |
+| Landing page | `http://localhost:8000/public/landing/` |
+
+Tests: `npm test` (node's built-in runner, no dependencies).
+
+> Don't use `python3 -m http.server` here — Python is broken inside the Semantix
+> AppImage sandbox (`init_fs_encoding`). The Node server above replaces it.
 
 ## Usage
 
