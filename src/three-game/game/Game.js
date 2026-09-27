@@ -47,6 +47,7 @@ export class Game {
 
     this.hud.onButton = () => this.pressPrimaryButton();
     this.hud.onRestart = () => this.pressRestartButton();
+    this.hud.onPause = () => this.pressPauseButton();
     this.hud.showReady(this.score.best);
     this.events.emit("state:changed", this.state);
   }
@@ -72,7 +73,7 @@ export class Game {
     return true;
   }
 
-  resume() {
+  resume(reason = "manual") {
     if (this.state !== STATE.PAUSED) return false;
     this.state = STATE.PLAYING;
     this.hud.hide();
@@ -80,12 +81,12 @@ export class Game {
     // lane-change/jump burst.
     this.input.endFrame();
     this.events.emit("state:changed", this.state);
-    this.events.emit("run:resumed", null);
+    this.events.emit("run:resumed", { reason });
     return true;
   }
 
   togglePause(reason = "manual") {
-    if (this.state === STATE.PAUSED) return this.resume();
+    if (this.state === STATE.PAUSED) return this.resume(reason);
     return this.pause(reason);
   }
 
@@ -96,7 +97,7 @@ export class Game {
   /** Overlay button: Resume when paused, otherwise start a run. */
   pressPrimaryButton() {
     if (this.state === STATE.PAUSED) {
-      this.resume();
+      this.resume("button");
       return;
     }
     this.requestStart();
@@ -107,6 +108,14 @@ export class Game {
     if (this.state !== STATE.PAUSED) return false;
     this.startRun();
     return true;
+  }
+
+  /**
+   * On-screen pause control. Phones have no P key, so the button toggles:
+   * tap to freeze the run, tap again to pick it back up.
+   */
+  pressPauseButton() {
+    return this.togglePause("button");
   }
 
   /**
@@ -188,7 +197,7 @@ export class Game {
     // Paused swallows the frame whole: no simulation, no juice decay, and no
     // input except the resume key. The scene stays rendered, frozen.
     if (this.state === STATE.PAUSED) {
-      if (this.input.consume("pause")) this.resume();
+      if (this.input.consume("pause")) this.resume("key");
       this.input.endFrame();
       return;
     }

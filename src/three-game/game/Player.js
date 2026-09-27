@@ -1,6 +1,12 @@
 import * as THREE from "three";
 import { CONFIG } from "../config.js";
 
+/** Discrete presses of a lane action this frame — 1 for a keyboard tap. */
+function laneSteps(input, action) {
+  if (typeof input.consumeCount === "function") return input.consumeCount(action);
+  return input.consume(action) ? 1 : 0;
+}
+
 export class Player {
   constructor(scene, events = null) {
     this.scene = scene;
@@ -56,18 +62,27 @@ export class Player {
   handleInput(input) {
     if (!this.active) return;
 
-    if (input.consume("left") && this.laneIndex > 0) {
-      this.laneIndex -= 1;
-      this.events?.emit("player:lane", this.laneIndex);
-    }
-    if (input.consume("right") && this.laneIndex < CONFIG.lanes.length - 1) {
-      this.laneIndex += 1;
-      this.events?.emit("player:lane", this.laneIndex);
-    }
+    // Lane changes are counted, not boolean: a keyboard tap is one step, a
+    // fast touch flick can queue several in the same frame.
+    const left = laneSteps(input, "left");
+    if (left > 0) this.stepLane(-left);
+    const right = laneSteps(input, "right");
+    if (right > 0) this.stepLane(right);
     if (input.consume("jump") && this.grounded) {
       this.velocityY = CONFIG.player.jumpVelocity;
       this.grounded = false;
       this.events?.emit("player:jumped", null);
+    }
+  }
+
+  /** Move N lanes in one frame, one tick per lane, clamped to the track. */
+  stepLane(steps) {
+    const dir = Math.sign(steps);
+    for (let i = 0; i < Math.abs(steps); i++) {
+      const next = this.laneIndex + dir;
+      if (next < 0 || next > CONFIG.lanes.length - 1) break;
+      this.laneIndex = next;
+      this.events?.emit("player:lane", this.laneIndex);
     }
   }
 

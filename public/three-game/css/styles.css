@@ -15,6 +15,8 @@
   --danger: #ff2d55;
   --coin: #ffd60a;
   --font: "Segoe UI", system-ui, -apple-system, sans-serif;
+  /* One notch/rounded-corner inset for the whole top HUD stack. */
+  --safe-top: env(safe-area-inset-top);
 }
 
 html,
@@ -25,11 +27,18 @@ body {
   background: var(--bg);
   color: var(--text);
   font-family: var(--font);
+  /* A thumb drag on the track is a lane change, never a scroll or a zoom. */
+  overscroll-behavior: none;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: none;
 }
 
 #game-root {
   position: fixed;
   inset: 0;
+  touch-action: none; /* kills pull-to-refresh + pinch on the play surface */
 }
 
 #game-root canvas {
@@ -53,7 +62,7 @@ body.is-paused #game-root canvas {
 
 #hud-top {
   position: absolute;
-  top: 20px;
+  top: calc(20px + var(--safe-top));
   left: 50%;
   transform: translateX(-50%);
   display: flex;
@@ -95,7 +104,7 @@ body.is-paused #game-root canvas {
 
 #hud-dash {
   position: absolute;
-  top: 84px;
+  top: calc(84px + var(--safe-top));
   left: 50%;
   transform: translateX(-50%);
   width: 340px;
@@ -123,7 +132,7 @@ body.is-paused #game-root canvas {
 
 #hud-powerups {
   position: absolute;
-  top: 106px;
+  top: calc(106px + var(--safe-top));
   left: 50%;
   transform: translateX(-50%);
   display: flex;
@@ -164,8 +173,8 @@ body.is-paused #game-root canvas {
 #hud-mute {
   pointer-events: auto;
   position: absolute;
-  top: 20px;
-  right: 20px;
+  top: calc(20px + var(--safe-top));
+  right: calc(20px + env(safe-area-inset-right));
   width: 48px;
   height: 48px;
   border-radius: 14px;
@@ -187,6 +196,47 @@ body.is-paused #game-root canvas {
 #hud-mute:focus-visible {
   outline: 2px solid var(--accent-2);
   outline-offset: 2px;
+}
+
+/* Touch pause control — phones have no P key. Hidden until we detect a
+   real touchscreen (body.touch-capable, set in main.js). */
+#hud-pause {
+  display: none;
+  pointer-events: auto;
+  position: absolute;
+  right: 20px;
+  bottom: calc(20px + env(safe-area-inset-bottom));
+  width: 56px;
+  height: 56px;
+  border-radius: 18px;
+  background: var(--panel);
+  border: 1px solid var(--panel-border);
+  backdrop-filter: blur(12px);
+  color: var(--text);
+  font-size: 22px;
+  line-height: 1;
+  cursor: pointer;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+  transition: transform 0.15s ease, border-color 0.15s ease;
+}
+
+body.touch-capable #hud-pause {
+  display: block;
+}
+
+/* CONFIG.touch.showPauseButton = false */
+#hud-pause.hidden {
+  display: none !important;
+}
+
+#hud-pause:active {
+  transform: scale(0.94);
+  border-color: var(--accent-2);
+}
+
+#hud-pause.is-resume {
+  color: var(--accent-2);
+  border-color: var(--accent-2);
 }
 
 .overlay {
@@ -248,6 +298,31 @@ body.is-paused #game-root canvas {
   color: var(--muted);
   margin-bottom: 26px;
   line-height: 1.9;
+}
+
+/* Two flavours of the same hint line: keys on a keyboard, gestures on glass. */
+.overlay-controls-touch {
+  display: none;
+}
+
+body.touch-capable .overlay-controls-keyboard {
+  display: none;
+}
+
+body.touch-capable .overlay-controls-touch {
+  display: block;
+}
+
+.gesture {
+  display: inline-block;
+  padding: 3px 8px;
+  margin: 0 2px;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  font-size: 12px;
+  color: var(--accent-2);
+  text-transform: lowercase;
 }
 
 kbd {
@@ -323,13 +398,13 @@ kbd {
 
 @media (max-width: 520px) {
   #hud-top {
-    top: 12px;
+    top: calc(12px + var(--safe-top));
     gap: 8px;
   }
 
   #hud-dash {
     position: absolute;
-    top: 84px;
+    top: calc(84px + var(--safe-top));
     left: 50%;
     transform: translateX(-50%);
     width: 340px;
@@ -365,9 +440,17 @@ kbd {
     }
   }
 
+  #hud-pause {
+    width: 48px;
+    height: 48px;
+    font-size: 19px;
+    right: calc(14px + env(safe-area-inset-right));
+    bottom: calc(14px + env(safe-area-inset-bottom));
+  }
+
   #hud-mute {
-    top: 12px;
-    right: 12px;
+    top: calc(12px + var(--safe-top));
+    right: calc(12px + env(safe-area-inset-right));
     width: 40px;
     height: 40px;
     font-size: 16px;

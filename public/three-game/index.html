@@ -2,7 +2,10 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"
+  />
   <title>Neon Runner — 3D Game</title>
   <link rel="stylesheet" href="./css/styles.css" />
   <script type="importmap">
@@ -38,16 +41,23 @@
     </div>
 
     <button id="hud-mute" type="button" aria-pressed="false" title="Mute (M)">🔊</button>
+    <button id="hud-pause" type="button" aria-label="Pause run" title="Pause run">⏸</button>
 
     <div id="overlay" class="overlay visible">
       <div class="overlay-card">
         <p class="overlay-kicker">3D SANDBOX</p>
         <h1 id="overlay-title">Neon Runner</h1>
         <p id="overlay-message">Dodge the blocks. Grab the coins. Don't stop.</p>
-        <p class="overlay-controls">
+        <p class="overlay-controls overlay-controls-keyboard">
           <kbd>←</kbd><kbd>→</kbd> or <kbd>A</kbd><kbd>D</kbd> lanes ·
           <kbd>Space</kbd> jump · <kbd>Shift</kbd> dash · <kbd>M</kbd> mute ·
           <kbd>P</kbd> pause
+        </p>
+        <p class="overlay-controls overlay-controls-touch">
+          <span class="gesture">← →</span> swipe lanes ·
+          <span class="gesture">↑</span> swipe jump ·
+          <span class="gesture">tap</span> dash ·
+          <span class="gesture">hold</span> pause
         </p>
         <div class="overlay-actions">
           <button id="overlay-button" type="button">Start Run</button>

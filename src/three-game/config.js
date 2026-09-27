@@ -89,6 +89,19 @@ export const CONFIG = {
     autoOnHidden: true,
   },
 
+  touch: {
+    // One-finger gestures on the track (see core/TouchControls.js). Pixels are
+    // CSS px, so thresholds are finger-width-ish and independent of resolution.
+    swipeThreshold: 28, // travel per lane change; a long flick crosses several
+    tapSlopPx: 16, // movement still counted as a tap, not a swipe
+    holdToPauseMs: 420, // finger held still this long, then lifted -> pause
+    // Listen on every device: desktop simply never fires touch* events, so the
+    // same build answers keyboard and thumb without a runtime branch.
+    attachAlways: true,
+    // On-screen ⏸ for phones, where there is no P key.
+    showPauseButton: true,
+  },
+
   dash: {
     // Shift bursts through obstacles; energy fills from coins (4 coins = full).
     duration: 1.2,

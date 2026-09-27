@@ -12,6 +12,7 @@ export class HUD {
     this.bestEl = document.getElementById("hud-best");
     this.coinsEl = document.getElementById("hud-coins");
     this.muteEl = document.getElementById("hud-mute");
+    this.pauseEl = document.getElementById("hud-pause");
     this.dashEl = document.getElementById("hud-dash");
     this.dashFillEl = document.getElementById("hud-dash-fill");
     this.powerupEl = document.getElementById("hud-powerups");
@@ -19,8 +20,17 @@ export class HUD {
 
     this.onButton = null;
     this.onRestart = null;
+    this.onPause = null;
     this.buttonEl.addEventListener("click", () => this.onButton?.());
     this.restartEl?.addEventListener("click", () => this.onRestart?.());
+
+    // Phones have no P key: the only way to freeze a run is this button.
+    this.pauseEl?.addEventListener("click", () => {
+      this.onPause?.();
+      this.pauseEl.blur();
+    });
+
+    this.events.on("state:changed", (state) => this.setPauseGlyph(state));
 
     // Mute is owned by AudioManager; the HUD only mirrors its state.
     this.muteEl.addEventListener("click", () => {
@@ -75,6 +85,21 @@ export class HUD {
   /** "Restart Run" only belongs on the pause screen. */
   setRestartVisible(visible) {
     this.restartEl?.classList.toggle("visible", visible);
+  }
+
+  /** CONFIG.touch.showPauseButton = false hides it; hold-to-pause still works. */
+  setPauseButtonVisible(visible) {
+    this.pauseEl?.classList.toggle("hidden", !visible);
+  }
+
+  /** ⏸ while a run lives, ▶ while it waits — same button, both directions. */
+  setPauseGlyph(state) {
+    if (!this.pauseEl) return;
+    const paused = state === "paused";
+    this.pauseEl.textContent = paused ? "▶" : "⏸";
+    this.pauseEl.title = paused ? "Resume run" : "Pause run";
+    this.pauseEl.setAttribute("aria-label", this.pauseEl.title);
+    this.pauseEl.classList.toggle("is-resume", paused);
   }
 
   showReady(best) {
