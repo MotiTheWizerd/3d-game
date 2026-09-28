@@ -175,8 +175,6 @@ export class Game {
 
   endRun() {
     if (this.state !== STATE.PLAYING) return;
-    // Consume shield if active — free hit.
-    this.powerUpSystem.consumeShield();
     // Clear timed effects on game-over.
     for (const type of [...this.powerUpSystem.active.keys()]) {
       this.powerUpSystem.remove(type);
@@ -269,8 +267,22 @@ export class Game {
         this.player,
         this.obstacles.getActive()
       );
-      if (hits.length > 0 && !this.player.dashing && !this.powerUpSystem.isGhost) {
-        this.endRun();
+      if (
+        hits.length > 0 &&
+        !this.player.dashing &&
+        !this.powerUpSystem.isGhost
+      ) {
+        // Shield absorbs the crash — smash the obstacle and keep running.
+        if (this.powerUpSystem.consumeShield()) {
+          for (let i = hits.length - 1; i >= 0; i--) {
+            const index = hits[i];
+            const position = this.obstacles.getActive()[index].position.clone();
+            this.obstacles.smash(index);
+            this.events.emit("obstacle:smashed", { position });
+          }
+        } else {
+          this.endRun();
+        }
       } else {
         // Dashing smashes through anything in the way. Descend so the
         // splice inside smash() can't shift later indices.

@@ -91,6 +91,7 @@ export class PowerUpSystem {
   consumeShield() {
     if (!this.shieldActive) return false;
     this.shieldActive = false;
+    this.events.emit("powerup:expired", { type: "shield" });
     return true;
   }
 
