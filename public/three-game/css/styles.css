@@ -286,11 +286,29 @@ body.touch-capable #hud-pause {
   margin-bottom: 12px;
 }
 
+.overlay-best {
+  color: var(--accent-2);
+  font-size: 13px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  margin: -4px 0 14px;
+}
+
 #overlay-message {
   color: var(--muted);
   font-size: 15px;
   line-height: 1.5;
   margin-bottom: 18px;
+}
+
+/* Beating your record gets a slow golden heartbeat on the title. */
+@keyframes best-pulse {
+  0%, 100% { filter: drop-shadow(0 0 6px rgba(255, 196, 87, 0.25)); }
+  50% { filter: drop-shadow(0 0 22px rgba(255, 196, 87, 0.65)); }
+}
+
+.overlay-card.is-new-best h1 {
+  animation: best-pulse 1.4s ease-in-out infinite;
 }
 
 .overlay-controls {

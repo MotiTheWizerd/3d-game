@@ -189,12 +189,13 @@ export class Game {
     this.player.setActive(false);
     const previousBest = this.score.best;
     const finalScore = this.score.finalize();
-    this.hud.showGameOver(finalScore, this.score.best);
+    const isNewBest = finalScore > previousBest && finalScore > 0;
+    this.hud.showGameOver(finalScore, this.score.best, isNewBest);
     this.events.emit("state:changed", this.state);
     this.events.emit("run:ended", {
       score: finalScore,
       best: this.score.best,
-      isNewBest: finalScore > previousBest && finalScore > 0,
+      isNewBest,
     });
   }
 

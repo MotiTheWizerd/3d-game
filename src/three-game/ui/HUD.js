@@ -8,6 +8,8 @@ export class HUD {
     this.messageEl = document.getElementById("overlay-message");
     this.buttonEl = document.getElementById("overlay-button");
     this.restartEl = document.getElementById("overlay-restart");
+    this.cardEl = this.overlay.querySelector(".overlay-card");
+    this.bestLineEl = document.getElementById("overlay-best");
     this.scoreEl = document.getElementById("hud-score");
     this.bestEl = document.getElementById("hud-best");
     this.coinsEl = document.getElementById("hud-coins");
@@ -107,16 +109,31 @@ export class HUD {
     this.messageEl.textContent = "Dodge the blocks. Grab the coins. Don't stop.";
     this.buttonEl.textContent = "Start Run";
     this.bestEl.textContent = String(best);
+    this.setBestLine(best > 0 ? `Best ${best}` : null);
+    this.cardEl?.classList.remove("is-new-best");
     this.setRestartVisible(false);
     this.overlay.classList.add("visible");
   }
 
-  showGameOver(score, best) {
-    this.titleEl.textContent = "Run Over";
+  showGameOver(score, best, isNewBest = false) {
+    this.titleEl.textContent = isNewBest ? "\u{1F3C6} New Best!" : "Run Over";
     this.messageEl.textContent = `Score ${score} · Best ${best}`;
     this.buttonEl.textContent = "Run Again";
+    this.setBestLine(null);
+    this.cardEl?.classList.toggle("is-new-best", isNewBest);
     this.setRestartVisible(false);
     this.overlay.classList.add("visible");
+  }
+
+  /** The start card remembers you: "Best N" once a run has been finished. */
+  setBestLine(text) {
+    if (!this.bestLineEl) return;
+    if (!text) {
+      this.bestLineEl.hidden = true;
+      return;
+    }
+    this.bestLineEl.textContent = text;
+    this.bestLineEl.hidden = false;
   }
 
   /** Pause screen: the primary button resumes, the ghost one restarts. */
@@ -131,6 +148,7 @@ export class HUD {
 
   hide() {
     this.overlay.classList.remove("visible");
+    this.cardEl?.classList.remove("is-new-best");
     this.setRestartVisible(false);
     document.body.classList.remove("is-paused");
     // Drop focus so Space/Enter don't re-click the button mid-run.
