@@ -5,6 +5,10 @@ export const CONFIG = {
   player: {
     restY: 0.55,
     jumpVelocity: 14,
+    // Double jump: pressing jump again while airborne, only near the apex
+    // (vertical speed within the window). Slightly weaker than the first jump.
+    doubleJumpVelocity: 12,
+    doubleJumpWindow: 2.0,
     gravity: -42,
     halfWidth: 0.45,
     halfDepth: 0.45,

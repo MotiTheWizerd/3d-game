@@ -170,3 +170,60 @@ test("reset returns player to middle lane, grounded, zeroed rotation", () => {
   assert.equal(player.mesh.rotation.x, 0);
   assert.equal(player.mesh.rotation.z, 0);
 });
+// ---- double jump ---------------------------------------------------------
+
+function makeFancyInput() {
+  const queue = { jump: [] };
+  return {
+    consume: (k) => queue[k]?.shift() ?? false,
+    consumeCount: (k) => (queue[k]?.shift() ? 1 : 0),
+    press: (k) => queue[k]?.push(true),
+  };
+}
+
+test("a second jump press at the apex boosts higher (double jump)", () => {
+  const player = makePlayer();
+  const input = makeFancyInput();
+  input.press("jump");
+  player.handleInput(input); // grounded jump
+  assert.equal(player.grounded, false);
+  // fall back to near the apex
+  player.velocityY = 1.0;
+  player.handleInput({ consume: () => true, press: input.press });
+  assert.equal(player.velocityY, CONFIG.player.doubleJumpVelocity);
+  assert.equal(player.grounded, false);
+});
+
+test("double jump does not fire while rising fast (outside the apex window)", () => {
+  const player = makePlayer();
+  player.velocityY = CONFIG.player.jumpVelocity; // just left the ground
+  player.grounded = false;
+  player.airJumps = 1;
+  player.handleInput({ consume: () => true });
+  assert.equal(player.velocityY, CONFIG.player.jumpVelocity); // unchanged
+});
+
+test("only one air jump per flight", () => {
+  const player = makePlayer();
+  player.velocityY = 0.5;
+  player.grounded = false;
+  player.handleInput({ consume: () => true }); // first air jump
+  player.velocityY = 0.5; // still near apex somehow
+  player.handleInput({ consume: () => true }); // should be ignored
+  assert.equal(player.velocityY, 0.5);
+});
+
+test("landing resets the double jump for the next hop", () => {
+  const player = makePlayer();
+  player.grounded = false;
+  player.airJumps = 0;
+  player.position.y = CONFIG.player.restY + 1;
+  player.velocityY = -5;
+  player.update(0.2); // falls and lands
+  assert.equal(player.grounded, true);
+  player.velocityY = 1.0;
+  player.handleInput({ consume: () => true });
+  assert.equal(player.velocityY, CONFIG.player.jumpVelocity);
+  assert.equal(player.airJumps, 1);
+});
+

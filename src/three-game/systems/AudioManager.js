@@ -50,6 +50,7 @@ export class AudioManager {
 
     this.subscriptions = [
       this.events.on("player:jumped", () => this.playJump()),
+      this.events.on("player:doubleJumped", () => this.playJump(1.3)),
       this.events.on("player:lane", () => this.playLane()),
       this.events.on("coin:collected", () => this.playCoin()),
       this.events.on("run:started", () => {
@@ -204,12 +205,12 @@ export class AudioManager {
 
   // ---- sounds -----------------------------------------------------------
 
-  playJump() {
+  playJump(pitchMult = 1) {
     if (!this.ensureContext() || this.muted) return;
     this.sweep({
       type: "triangle",
-      from: 280,
-      to: 720,
+      from: 280 * pitchMult,
+      to: 720 * pitchMult,
       duration: 0.14,
       volume: 0.4,
     });

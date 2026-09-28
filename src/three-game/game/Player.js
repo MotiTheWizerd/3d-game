@@ -14,6 +14,7 @@ export class Player {
     this.laneIndex = 1;
     this.velocityY = 0;
     this.grounded = true;
+    this.airJumps = 0;
     this.active = true;
     this.dashTimer = 0;
     this._magnetRadius = 0;
@@ -68,10 +69,22 @@ export class Player {
     if (left > 0) this.stepLane(-left);
     const right = laneSteps(input, "right");
     if (right > 0) this.stepLane(right);
-    if (input.consume("jump") && this.grounded) {
+    if (!input.consume("jump")) return;
+
+    if (this.grounded) {
       this.velocityY = CONFIG.player.jumpVelocity;
       this.grounded = false;
+      this.airJumps = 1;
       this.events?.emit("player:jumped", null);
+    } else if (this.airJumps > 0) {
+      // Double jump: only near the apex, when vertical speed is still small.
+      if (Math.abs(this.velocityY) <= CONFIG.player.doubleJumpWindow) {
+        this.velocityY = CONFIG.player.doubleJumpVelocity;
+        this.airJumps = 0;
+        this.events?.emit("player:doubleJumped", null);
+      } else {
+        input.press?.("jump"); // rising/falling fast: put the press back
+      }
     }
   }
 
@@ -99,6 +112,7 @@ export class Player {
         this.mesh.position.y = CONFIG.player.restY;
         this.velocityY = 0;
         this.grounded = true;
+        this.airJumps = 0;
       }
     }
 
@@ -142,6 +156,7 @@ export class Player {
     this.laneIndex = 1;
     this.velocityY = 0;
     this.grounded = true;
+    this.airJumps = 0;
     this.active = true;
     this.dashTimer = 0;
     this._magnetRadius = 0;
