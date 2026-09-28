@@ -44,6 +44,25 @@ export const CONFIG = {
     jumpableMaxHeight: 1.4,
   },
 
+  difficulty: {
+    // Discrete levels ride ON TOP of the continuous speed/interval ramp:
+    // one level per levelSeconds of run time, wave composition hardens.
+    //   doubleLaneChance — chance a wave blocks two lanes
+    //   solidChance      — chance an obstacle is a solid 2.6 wall (must dodge)
+    levelSeconds: 25,
+    maxLevel: 6,
+    levels: [
+      // Level 1 is a warm-up: single lanes, everything jumpable.
+      { doubleLaneChance: 0, solidChance: 0 },
+      { doubleLaneChance: 0.2, solidChance: 0 },
+      { doubleLaneChance: 0.3, solidChance: 0.12 },
+      { doubleLaneChance: 0.35, solidChance: 0.2 },
+      { doubleLaneChance: 0.4, solidChance: 0.25 },
+      // Level 6+: the full sandbox — nastier than the old always-on mix.
+      { doubleLaneChance: 0.45, solidChance: 0.3 },
+    ],
+  },
+
   coins: {
     spawnInterval: 2.4,
     value: 10,

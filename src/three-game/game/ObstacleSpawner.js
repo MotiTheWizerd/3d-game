@@ -2,8 +2,18 @@ import * as THREE from "three";
 import { CONFIG } from "../config.js";
 
 export class ObstacleSpawner {
-  constructor(scene) {
+  constructor(scene, difficulty = null) {
     this.scene = scene;
+    // Optional LevelSystem: when attached, wave composition (lanes blocked,
+    // solid walls) follows the current level's profile. Null keeps the
+    // legacy always-on mix so old behaviour/tests stay untouched.
+    this.difficulty = difficulty;
+    this.jumpableHeights = CONFIG.obstacles.heights.filter(
+      (h) => h <= CONFIG.obstacles.jumpableMaxHeight
+    );
+    this.solidHeights = CONFIG.obstacles.heights.filter(
+      (h) => h > CONFIG.obstacles.jumpableMaxHeight
+    );
     this.pool = [];
     this.active = [];
     this.timer = 0;
@@ -57,11 +67,24 @@ export class ObstacleSpawner {
 
   spawnWave() {
     const laneOrder = [0, 1, 2].sort(() => Math.random() - 0.5);
-    const blockedCount = Math.random() < 0.35 ? 2 : 1;
-    const height =
-      CONFIG.obstacles.heights[
-        Math.floor(Math.random() * CONFIG.obstacles.heights.length)
-      ];
+    const profile = this.difficulty ? this.difficulty.profile : null;
+    const blockedCount =
+      Math.random() < (profile ? profile.doubleLaneChance : 0.35) ? 2 : 1;
+
+    let height;
+    if (profile) {
+      // Level-gated composition: jumpable heights normally, solid walls by chance.
+      const pool =
+        Math.random() < profile.solidChance
+          ? this.solidHeights
+          : this.jumpableHeights;
+      height = pool[Math.floor(Math.random() * pool.length)];
+    } else {
+      height =
+        CONFIG.obstacles.heights[
+          Math.floor(Math.random() * CONFIG.obstacles.heights.length)
+        ];
+    }
 
     for (let i = 0; i < blockedCount; i++) {
       const lane = laneOrder[i];

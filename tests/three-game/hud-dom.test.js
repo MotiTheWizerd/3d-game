@@ -131,6 +131,7 @@ function buildDocument() {
     ["hud-dash", "div"],
     ["hud-dash-fill", "div"],
     ["hud-powerups", "div"],
+    ["hud-level", "div"],
   ]) {
     const node = el(id, tag);
     doc.byId[id] = node;
@@ -289,4 +290,38 @@ test("powerup badges appear on collect and fade out on expiry", () => {
   assert.ok(!badge.classList.contains("active"));
   assert.equal(badge.style.opacity, "0");
   assert.equal(hud.powerupEl.children.length, 1, "removed only after the 300ms fade");
+
+// ---- Level toast -----------------------------------------------------------------
+
+test("level:changed flashes the LEVEL N toast", () => {
+  const { hud, events } = makeHud();
+
+  events.emit("level:changed", { level: 2, previous: 1 });
+  assert.equal(hud.levelEl.textContent, "LEVEL 2");
+  assert.ok(hud.levelEl.classList.contains("visible"));
+
+  events.emit("level:changed", { level: 3, previous: 2 });
+  assert.equal(hud.levelEl.textContent, "LEVEL 3", "toast reuses the one element");
+});
+
+test("hide clears a stale level toast with the overlay", () => {
+  const { hud, events } = makeHud();
+
+  events.emit("level:changed", { level: 3, previous: 2 });
+  assert.ok(hud.levelEl.classList.contains("visible"));
+
+  hud.hide();
+  assert.ok(!hud.levelEl.classList.contains("visible"), "toast cleared");
+});
+
+test("a DOM without the level markup never crashes the HUD", () => {
+  globalThis.document = buildDocument();
+  delete globalThis.document.byId["hud-level"];
+  const events = new EventBus();
+  const hud = new HUD(events);
+
+  events.emit("level:changed", { level: 2, previous: 1 });
+  hud.hide();
+  assert.equal(hud.levelEl, null);
+});
 });

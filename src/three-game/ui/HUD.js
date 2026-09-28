@@ -28,6 +28,9 @@ export class HUD {
     this.dashFillEl = document.getElementById("hud-dash-fill");
     this.powerupEl = document.getElementById("hud-powerups");
     this.powerupEls = {}; // type → { el }
+    // Level toast (optional markup — a missing element degrades to no toast).
+    this.levelEl = document.getElementById("hud-level");
+    this.levelToastTimer = null;
 
     this.onButton = null;
     this.onRestart = null;
@@ -64,6 +67,17 @@ export class HUD {
     this.events.on("dash:energy-changed", (energy) => {
       this.dashFillEl.style.width = `${Math.round(energy * 100)}%`;
       this.dashEl.classList.toggle("ready", energy >= 1 - 1e-9);
+    });
+
+    // Level toast: flash "LEVEL N" mid-run, fade out after a moment.
+    this.events.on("level:changed", ({ level }) => {
+      if (!this.levelEl) return;
+      this.levelEl.textContent = `LEVEL ${level}`;
+      this.levelEl.classList.add("visible");
+      clearTimeout(this.levelToastTimer);
+      this.levelToastTimer = setTimeout(() => {
+        this.levelEl.classList.remove("visible");
+      }, 1600);
     });
 
     // Power-up indicators.
@@ -182,6 +196,7 @@ export class HUD {
     this.overlay.classList.remove("visible");
     this.cardEl?.classList.remove("is-new-best");
     this.setRestartVisible(false);
+    this.levelEl?.classList.remove("visible");
     document.body.classList.remove("is-paused");
     // Drop focus so Space/Enter don't re-click the button mid-run.
     this.buttonEl.blur();

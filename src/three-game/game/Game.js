@@ -5,6 +5,7 @@ import { ObstacleSpawner } from "./ObstacleSpawner.js";
 import { CoinSpawner } from "./CoinSpawner.js";
 import { CollisionSystem } from "../systems/CollisionSystem.js";
 import { ScoreSystem } from "../systems/ScoreSystem.js";
+import { LevelSystem } from "../systems/LevelSystem.js";
 import { ParticleSystem } from "../systems/ParticleSystem.js";
 import { PowerUpSpawner } from "./PowerUpSpawner.js";
 import { PowerUpSystem } from "../systems/PowerUpSystem.js";
@@ -37,7 +38,8 @@ export class Game {
 
     this.world = new World(engine.scene);
     this.player = new Player(engine.scene, events);
-    this.obstacles = new ObstacleSpawner(engine.scene);
+    this.difficulty = new LevelSystem(events);
+    this.obstacles = new ObstacleSpawner(engine.scene, this.difficulty);
     this.coins = new CoinSpawner(engine.scene);
     this.collisions = new CollisionSystem();
     this.score = new ScoreSystem(events);
@@ -161,6 +163,7 @@ export class Game {
     this.obstacles.reset();
     this.coins.reset();
     this.score.reset();
+    this.difficulty.reset();
     this.particles.reset();
     this.cameraFX.reset();
     this.powerUps.reset();
@@ -235,6 +238,7 @@ export class Game {
         CONFIG.speed.max,
         this.speed + CONFIG.speed.acceleration * dt
       );
+      this.difficulty.update(dt);
 
       this.player.handleInput(this.input);
 

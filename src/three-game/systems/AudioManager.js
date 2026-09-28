@@ -15,6 +15,7 @@ const midiToFreq = (midi) => 440 * Math.pow(2, (midi - 69) / 12);
  *   player:lane      -> lane tick
  *   player:dashed    -> dash whoosh
  *   coin:collected   -> coin ping
+ *   level:changed    -> level-up fanfare
  *   obstacle:smashed -> smash thud
  *   run:started      -> start jingle
  *   run:ended        -> crash (+ best-score chime when isNewBest)
@@ -53,6 +54,7 @@ export class AudioManager {
       this.events.on("player:doubleJumped", () => this.playJump(1.3)),
       this.events.on("player:lane", () => this.playLane()),
       this.events.on("coin:collected", () => this.playCoin()),
+      this.events.on("level:changed", () => this.playLevelUp()),
       this.events.on("run:started", () => {
         this.playStart();
         this.startMusic();
@@ -301,6 +303,15 @@ export class AudioManager {
     this.note(t, 440.0, 0.08, "triangle", 0.3);
     this.note(t + 0.07, 554.37, 0.08, "triangle", 0.3);
     this.note(t + 0.14, 659.25, 0.2, "triangle", 0.3);
+  }
+
+  playLevelUp() {
+    if (!this.ensureContext() || this.muted) return;
+    // Rising three-note fanfare: C5 -> E5 -> G5.
+    const t = this.ctx.currentTime;
+    this.note(t, 523.25, 0.1, "triangle", 0.28);
+    this.note(t + 0.09, 659.25, 0.1, "triangle", 0.28);
+    this.note(t + 0.18, 783.99, 0.34, "triangle", 0.28);
   }
 
   playCrash(withBestChime = false) {

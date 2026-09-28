@@ -4,6 +4,7 @@ import { CONFIG } from "../config.js";
  * Camera juice — event-driven, like every other system.
  *   player:crashed -> trauma shake (offset scales with trauma^2)
  *   player:dashed  -> FOV punch, eased back exponentially
+ *   level:changed  -> FOV punch too (level-up kick)
  *
  * The game camera is otherwise static, so the base position/quaternion/fov
  * are captured at construction and restored whenever idle. Shake offsets
@@ -26,6 +27,7 @@ export class CameraFX {
       ? [
           events.on("player:crashed", () => this.addShake(1)),
           events.on("player:dashed", () => this.punchFov()),
+          events.on("level:changed", () => this.punchFov()),
         ]
       : [];
   }

@@ -160,6 +160,28 @@ body.is-paused #game-root canvas {
   transform: translateY(0);
 }
 
+/* Level toast — announces a new difficulty level mid-run, then fades. */
+#hud-level {
+  position: absolute;
+  top: calc(140px + var(--safe-top));
+  left: 50%;
+  transform: translateX(-50%) scale(0.85);
+  font-size: 26px;
+  font-weight: 800;
+  letter-spacing: 0.3em;
+  color: var(--accent-2);
+  text-shadow: 0 0 18px rgba(0, 229, 255, 0.6);
+  opacity: 0;
+  transition: opacity 0.25s ease, transform 0.25s ease;
+  pointer-events: none;
+  white-space: nowrap;
+}
+
+#hud-level.visible {
+  opacity: 1;
+  transform: translateX(-50%) scale(1);
+}
+
 @keyframes dash-pulse {
   0%,
   100% {
