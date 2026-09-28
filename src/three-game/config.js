@@ -78,11 +78,27 @@ export const CONFIG = {
         halfSize: 0.55,
         scale: 1.0,
       },
+      slowmo: {
+        label: "⏳ Slow-Mo",
+        color: 0x9d4edd,
+        emissive: 0x2d004b,
+        halfSize: 0.55,
+        scale: 1.0,
+      },
+      ghost: {
+        label: "👻 Ghost",
+        color: 0xb8fff4,
+        emissive: 0x1a5548,
+        halfSize: 0.55,
+        scale: 1.0,
+      },
     },
     // Active durations.
     duration: 10,
     // Magnet: extra pickup radius in units.
     magnetRadius: 3.0,
+    // Slow-mo: world scroll multiplier while active.
+    slowmoFactor: 0.6,
   },
   pause: {
     // Tab-switch / minimize auto-pauses a live run (manual: P or Esc).

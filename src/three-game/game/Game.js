@@ -243,9 +243,10 @@ export class Game {
       }
 
       this.player.update(dt);
-      const effectiveSpeed = this.player.dashing
-        ? this.speed * CONFIG.dash.speedMultiplier
-        : this.speed;
+      const effectiveSpeed =
+        (this.player.dashing
+          ? this.speed * CONFIG.dash.speedMultiplier
+          : this.speed) * this.powerUpSystem.speedFactor;
       this.world.update(dt, effectiveSpeed);
       this.obstacles.update(dt, effectiveSpeed);
       this.coins.update(dt, effectiveSpeed);
@@ -262,21 +263,25 @@ export class Game {
       this.score.coinMultiplier = this.powerUpSystem.coinMultiplier;
 
       // Check obstacle collisions.
+      // While ghost is active, hits are simply phased through — no crash,
+      // no smash. Only an active dash smashes obstacles.
       const hits = this.collisions.findObstacleHits(
         this.player,
         this.obstacles.getActive()
       );
-      if (hits.length > 0 && !this.player.dashing) {
+      if (hits.length > 0 && !this.player.dashing && !this.powerUpSystem.isGhost) {
         this.endRun();
       } else {
         // Dashing smashes through anything in the way. Descend so the
         // splice inside smash() can't shift later indices.
-        for (let i = hits.length - 1; i >= 0; i--) {
-          const index = hits[i];
-          const position = this.obstacles.getActive()[index].position.clone();
-          this.obstacles.smash(index);
-          this.score.addBonus(CONFIG.dash.smashBonus);
-          this.events.emit("obstacle:smashed", { position });
+        if (this.player.dashing) {
+          for (let i = hits.length - 1; i >= 0; i--) {
+            const index = hits[i];
+            const position = this.obstacles.getActive()[index].position.clone();
+            this.obstacles.smash(index);
+            this.score.addBonus(CONFIG.dash.smashBonus);
+            this.events.emit("obstacle:smashed", { position });
+          }
         }
 
         const collected = this.collisions.collectCoins(

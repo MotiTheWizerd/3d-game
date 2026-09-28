@@ -77,6 +77,16 @@ export class PowerUpSystem {
     return this.has("magnet") ? CONFIG.powerUps.magnetRadius : 0;
   }
 
+  /** World scroll multiplier while slow-mo is active (1 if not). */
+  get speedFactor() {
+    return this.has("slowmo") ? CONFIG.powerUps.slowmoFactor : 1;
+  }
+
+  /** While ghost is active the player phases through obstacles. */
+  get isGhost() {
+    return this.has("ghost");
+  }
+
   /** Consume the shield on collision (returns true if it was consumed). */
   consumeShield() {
     if (!this.shieldActive) return false;

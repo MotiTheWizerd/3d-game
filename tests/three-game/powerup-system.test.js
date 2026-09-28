@@ -1,6 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { PowerUpSystem } from "../../src/three-game/systems/PowerUpSystem.js";
+import { CONFIG } from "../../src/three-game/config.js";
 
 // Shared mock clock so all tests start at t=0.
 let tick = 0;
@@ -129,4 +130,27 @@ test("multiple types active simultaneously", () => {
   assert.ok(sys.has("score2x"));
   assert.equal(sys.coinMultiplier, 2);
   assert.ok(sys.extraMagnetRadius > 0);
+});
+
+test("slowmo halves-then-some world speed via speedFactor while active", () => {
+  makeClock();
+  const sys = new PowerUpSystem(events, getNow);
+  assert.equal(sys.speedFactor, 1); // inactive → no slowdown.
+  sys.activate("slowmo");
+  assert.equal(sys.speedFactor, CONFIG.powerUps.slowmoFactor);
+  // Expire it.
+  tick = CONFIG.powerUps.duration + 1;
+  sys.update(0);
+  assert.equal(sys.speedFactor, 1);
+});
+
+test("ghost phases through obstacles while active", () => {
+  makeClock();
+  const sys = new PowerUpSystem(events, getNow);
+  assert.equal(sys.isGhost, false);
+  sys.activate("ghost");
+  assert.equal(sys.isGhost, true);
+  tick = CONFIG.powerUps.duration + 1;
+  sys.update(0);
+  assert.equal(sys.isGhost, false);
 });
