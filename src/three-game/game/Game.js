@@ -28,6 +28,9 @@ export class Game {
     this.speed = CONFIG.speed.initial;
     this.dashEnergy = 0;
     this.elapsed = 0;
+    // True metres travelled this run — score.distance is polluted by bonus
+    // points (addBonus), so the stat sheet tracks its own raw accumulator.
+    this.runDistance = 0;
 
     this.visibilityDoc = null;
     this.onVisibilityChange = null;
@@ -152,6 +155,7 @@ export class Game {
     this.speed = CONFIG.speed.initial;
     this.setDashEnergy(0);
     this.elapsed = 0;
+    this.runDistance = 0;
     this.world.reset();
     this.player.reset();
     this.obstacles.reset();
@@ -188,7 +192,12 @@ export class Game {
     const previousBest = this.score.best;
     const finalScore = this.score.finalize();
     const isNewBest = finalScore > previousBest && finalScore > 0;
-    this.hud.showGameOver(finalScore, this.score.best, isNewBest);
+    this.hud.showGameOver(finalScore, this.score.best, isNewBest, {
+      distance: Math.floor(this.runDistance),
+      coins: this.score.coins,
+      smashes: this.score.smashes,
+      time: Math.round(this.elapsed * 10) / 10,
+    });
     this.events.emit("state:changed", this.state);
     this.events.emit("run:ended", {
       score: finalScore,
@@ -254,6 +263,7 @@ export class Game {
         this.particles.trail(this.player.position, effectiveSpeed, dt);
       }
       this.score.addDistance(effectiveSpeed * dt);
+      this.runDistance += effectiveSpeed * dt;
 
       // Update power-up effects.
       this.powerUpSystem.update(dt);
@@ -278,6 +288,7 @@ export class Game {
             const index = hits[i];
             const position = this.obstacles.getActive()[index].position.clone();
             this.obstacles.smash(index);
+            this.score.addSmash();
             this.events.emit("obstacle:smashed", { position });
           }
         } else {
@@ -292,6 +303,7 @@ export class Game {
             const position = this.obstacles.getActive()[index].position.clone();
             this.obstacles.smash(index);
             this.score.addBonus(CONFIG.dash.smashBonus);
+            this.score.addSmash();
             this.events.emit("obstacle:smashed", { position });
           }
         }

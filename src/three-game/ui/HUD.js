@@ -10,6 +10,15 @@ export class HUD {
     this.restartEl = document.getElementById("overlay-restart");
     this.cardEl = this.overlay.querySelector(".overlay-card");
     this.bestLineEl = document.getElementById("overlay-best");
+    // Game-over stat sheet (distance / coins / smashes / time). Every element
+    // is optional: missing markup degrades to no stat sheet, never a crash.
+    this.statsEl = document.getElementById("overlay-stats");
+    this.statEls = {
+      distance: document.getElementById("stat-distance"),
+      coins: document.getElementById("stat-coins"),
+      smashes: document.getElementById("stat-smashes"),
+      time: document.getElementById("stat-time"),
+    };
     this.scoreEl = document.getElementById("hud-score");
     this.bestEl = document.getElementById("hud-best");
     this.coinsEl = document.getElementById("hud-coins");
@@ -112,17 +121,39 @@ export class HUD {
     this.setBestLine(best > 0 ? `Best ${best}` : null);
     this.cardEl?.classList.remove("is-new-best");
     this.setRestartVisible(false);
+    this.showStats(null);
     this.overlay.classList.add("visible");
   }
 
-  showGameOver(score, best, isNewBest = false) {
+  showGameOver(score, best, isNewBest = false, stats = null) {
     this.titleEl.textContent = isNewBest ? "\u{1F3C6} New Best!" : "Run Over";
     this.messageEl.textContent = `Score ${score} · Best ${best}`;
     this.buttonEl.textContent = "Run Again";
     this.setBestLine(null);
     this.cardEl?.classList.toggle("is-new-best", isNewBest);
     this.setRestartVisible(false);
+    this.showStats(stats);
     this.overlay.classList.add("visible");
+  }
+
+  /** The game-over stat sheet; null stats hides it (start + pause screens). */
+  showStats(stats) {
+    if (!this.statsEl) return;
+    if (!stats) {
+      this.statsEl.hidden = true;
+      return;
+    }
+    const values = {
+      distance: `${stats.distance} m`,
+      coins: String(stats.coins),
+      smashes: String(stats.smashes),
+      time: `${stats.time}s`,
+    };
+    for (const [key, text] of Object.entries(values)) {
+      const el = this.statEls[key];
+      if (el) el.textContent = text;
+    }
+    this.statsEl.hidden = false;
   }
 
   /** The start card remembers you: "Best N" once a run has been finished. */
@@ -142,6 +173,7 @@ export class HUD {
     this.messageEl.textContent = `Score ${score} — the track will wait.`;
     this.buttonEl.textContent = "Resume";
     this.setRestartVisible(true);
+    this.showStats(null);
     this.overlay.classList.add("visible");
     document.body.classList.add("is-paused");
   }

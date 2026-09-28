@@ -5,6 +5,7 @@ export class ScoreSystem {
     this.events = events;
     this.distance = 0;
     this.coins = 0;
+    this.smashes = 0;
     this.coinMultiplier = 1;
     this.best = this.loadBest();
   }
@@ -28,6 +29,7 @@ export class ScoreSystem {
   reset() {
     this.distance = 0;
     this.coins = 0;
+    this.smashes = 0;
     this.coinMultiplier = 1;
     this.publish();
   }
@@ -46,6 +48,11 @@ export class ScoreSystem {
   addBonus(points) {
     this.distance += points;
     this.publish();
+  }
+
+  /** Obstacles smashed this run (dash bursts + shield absorbs). Game-over sheet. */
+  addSmash() {
+    this.smashes += 1;
   }
 
   get score() {
