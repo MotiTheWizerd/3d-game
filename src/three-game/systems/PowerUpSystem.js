@@ -87,6 +87,11 @@ export class PowerUpSystem {
     return this.has("ghost");
   }
 
+  /** While gun is active the player's blaster auto-fires down the lane. */
+  get isGun() {
+    return this.has("gun");
+  }
+
   /** Consume the shield on collision (returns true if it was consumed). */
   consumeShield() {
     if (!this.shieldActive) return false;

@@ -115,6 +115,13 @@ export const CONFIG = {
         halfSize: 0.55,
         scale: 1.0,
       },
+      gun: {
+        label: "🔫 Blaster",
+        color: 0xff9f0a,
+        emissive: 0x663300,
+        halfSize: 0.55,
+        scale: 1.0,
+      },
     },
     // Active durations.
     duration: 10,
@@ -122,6 +129,16 @@ export const CONFIG = {
     magnetRadius: 3.0,
     // Slow-mo: world scroll multiplier while active.
     slowmoFactor: 0.6,
+    // Blaster (gun): auto-fires bolts down the player's lane while active —
+    // no extra input, so it works the same on keyboard and touch.
+    gun: {
+      fireInterval: 0.25, // seconds between shots
+      bulletSpeed: 60, // units/s down-range (-z)
+      range: 120, // despawn after travelling this far
+      muzzleY: 0.8, // fixed chest height: shots land in the lane, not the sky
+      halfSize: 0.2, // collision half-size of a bolt
+      smashBonus: 15, // points per obstacle shot to pieces
+    },
   },
   pause: {
     // Tab-switch / minimize auto-pauses a live run (manual: P or Esc).

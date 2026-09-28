@@ -144,6 +144,26 @@ test("slowmo halves-then-some world speed via speedFactor while active", () => {
   assert.equal(sys.speedFactor, 1);
 });
 
+test("gun arms auto-fire while active, then expires", () => {
+  makeClock();
+  const sys = new PowerUpSystem(events, getNow);
+  assert.equal(sys.isGun, false);
+  sys.activate("gun");
+  assert.equal(sys.isGun, true);
+  tick = CONFIG.powerUps.duration + 1;
+  sys.update(0);
+  assert.equal(sys.isGun, false);
+});
+
+test("gun coexists with the other timed pickups", () => {
+  makeClock();
+  const sys = new PowerUpSystem(events, getNow);
+  sys.activate("gun");
+  sys.activate("slowmo");
+  assert.equal(sys.isGun, true);
+  assert.equal(sys.speedFactor, CONFIG.powerUps.slowmoFactor);
+});
+
 test("ghost phases through obstacles while active", () => {
   makeClock();
   const sys = new PowerUpSystem(events, getNow);

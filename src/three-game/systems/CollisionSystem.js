@@ -11,7 +11,7 @@ function overlaps(a, b) {
   );
 }
 
-function obstacleBounds(mesh) {
+export function obstacleBounds(mesh) {
   const p = mesh.position;
   const hw = CONFIG.obstacles.halfWidth;
   const hd = CONFIG.obstacles.halfDepth;
@@ -68,6 +68,24 @@ export class CollisionSystem {
       }
     }
     return collected.reverse();
+  }
+
+  /** First obstacle the bolt overlaps, or -1 (solid walls count — that's the point). */
+  findBulletHit(bullet, obstacles) {
+    const p = bullet.position;
+    const hs = CONFIG.powerUps.gun.halfSize;
+    const bolt = {
+      minX: p.x - hs,
+      maxX: p.x + hs,
+      minY: p.y - hs,
+      maxY: p.y + hs,
+      minZ: p.z - hs,
+      maxZ: p.z + hs,
+    };
+    for (let i = 0; i < obstacles.length; i++) {
+      if (overlaps(bolt, obstacleBounds(obstacles[i]))) return i;
+    }
+    return -1;
   }
 
   /** Indices into `powerUps` that currently overlap the player (reverse order for splicing). */

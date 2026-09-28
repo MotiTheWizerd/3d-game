@@ -7,6 +7,7 @@ import { CollisionSystem } from "../systems/CollisionSystem.js";
 import { ScoreSystem } from "../systems/ScoreSystem.js";
 import { LevelSystem } from "../systems/LevelSystem.js";
 import { ParticleSystem } from "../systems/ParticleSystem.js";
+import { BulletSystem } from "../systems/BulletSystem.js";
 import { PowerUpSpawner } from "./PowerUpSpawner.js";
 import { PowerUpSystem } from "../systems/PowerUpSystem.js";
 import { CameraFX } from "../systems/CameraFX.js";
@@ -49,6 +50,10 @@ export class Game {
     // Power-up durations run on GAME time, not wall time: `elapsed` only
     // advances while playing, so a paused run can't bleed its timers away.
     this.powerUpSystem = new PowerUpSystem(events, () => this.elapsed * 1000);
+    this.bullets = new BulletSystem(engine.scene);
+    // Blaster trigger: counts down while the gun is active, 0 = ready to
+    // fire the instant a pickup lands (no dead time on collection).
+    this.gunCooldown = 0;
 
     this.hud.onButton = () => this.pressPrimaryButton();
     this.hud.onRestart = () => this.pressRestartButton();
@@ -168,6 +173,8 @@ export class Game {
     this.cameraFX.reset();
     this.powerUps.reset();
     this.powerUpSystem.reset();
+    this.bullets.reset();
+    this.gunCooldown = 0;
     this.player.magnetRadius = 0;
     this.hud.hide();
     this.events.emit("state:changed", this.state);
@@ -186,6 +193,9 @@ export class Game {
     for (const type of [...this.powerUpSystem.active.keys()]) {
       this.powerUpSystem.remove(type);
     }
+    // Bolts left mid-flight would hang frozen on the game-over screen.
+    this.bullets.reset();
+    this.gunCooldown = 0;
     this.player.magnetRadius = 0;
     // Crash juice fires before the bookkeeping so the debris is already
     // flying while the HUD comes up.
@@ -262,6 +272,42 @@ export class Game {
       this.obstacles.update(dt, effectiveSpeed);
       this.coins.update(dt, effectiveSpeed);
       this.powerUps.update(dt, effectiveSpeed, this.elapsed);
+
+      // Blaster: auto-fire down the player's lane while active. Bolts spawn
+      // at a fixed muzzle height so shots land in the lane, not the sky.
+      if (this.powerUpSystem.isGun) {
+        this.gunCooldown -= dt;
+        if (this.gunCooldown <= 0) {
+          this.gunCooldown = CONFIG.powerUps.gun.fireInterval;
+          this.bullets.fire(
+            this.player.position.x,
+            CONFIG.powerUps.gun.muzzleY,
+            this.player.position.z
+          );
+          this.events.emit("gun:fired", null);
+        }
+      } else {
+        this.gunCooldown = 0; // a fresh pickup fires instantly
+      }
+      this.bullets.update(dt);
+
+      // Bolts shatter obstacles before the player can reach them — including
+      // solid walls, which is the whole appeal. Positions are captured
+      // before smash() recycles the mesh (same rule as every event payload).
+      const bolts = this.bullets.getActive();
+      for (let i = bolts.length - 1; i >= 0; i--) {
+        const j = this.collisions.findBulletHit(
+          bolts[i],
+          this.obstacles.getActive()
+        );
+        if (j < 0) continue;
+        const position = this.obstacles.getActive()[j].position.clone();
+        this.obstacles.smash(j);
+        this.bullets.remove(i);
+        this.score.addBonus(CONFIG.powerUps.gun.smashBonus);
+        this.score.addSmash();
+        this.events.emit("obstacle:smashed", { position });
+      }
 
       if (this.player.dashing) {
         this.particles.trail(this.player.position, effectiveSpeed, dt);

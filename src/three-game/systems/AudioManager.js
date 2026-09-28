@@ -16,6 +16,7 @@ const midiToFreq = (midi) => 440 * Math.pow(2, (midi - 69) / 12);
  *   player:dashed    -> dash whoosh
  *   coin:collected   -> coin ping
  *   level:changed    -> level-up fanfare
+ *   gun:fired        -> blaster zap
  *   obstacle:smashed -> smash thud
  *   run:started      -> start jingle
  *   run:ended        -> crash (+ best-score chime when isNewBest)
@@ -55,6 +56,7 @@ export class AudioManager {
       this.events.on("player:lane", () => this.playLane()),
       this.events.on("coin:collected", () => this.playCoin()),
       this.events.on("level:changed", () => this.playLevelUp()),
+      this.events.on("gun:fired", () => this.playShoot()),
       this.events.on("run:started", () => {
         this.playStart();
         this.startMusic();
@@ -264,6 +266,19 @@ export class AudioManager {
       to: 520,
       duration: 0.25,
       volume: 0.18,
+    });
+  }
+
+  playShoot() {
+    if (!this.ensureContext() || this.muted) return;
+    // Laser zap: a fast square drop. Kept quiet — it fires many times
+    // per second while the blaster is live.
+    this.sweep({
+      type: "square",
+      from: 1400,
+      to: 220,
+      duration: 0.09,
+      volume: 0.12,
     });
   }
 
