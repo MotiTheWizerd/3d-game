@@ -204,6 +204,49 @@ export const CONFIG = {
     },
   },
 
+  dayNight: {
+    // One full day is cycleSeconds of RUN time — paused runs never move the
+    // sun. phase 0 = dawn; runs start there, so the first thing you see is a
+    // sunrise, and the neon night you know arrives mid-run.
+    cycleSeconds: 75,
+    startPhase: 0,
+    // Stars fade in with `night`, drawn by World as fog-free points.
+    starCount: 260,
+    // Palette control points. A segment runs from one keyframe's `at` to the
+    // next (wrapping); the look lerps between them and the new keyframe's
+    // name is announced to the HUD when its boundary is crossed.
+    //   sky/fog/hemiSky/hemiGround/dirColor — hex colors
+    //   fogNear/fogFar — visibility band (night closes the fog in)
+    //   hemi/dir — light intensities, rim — pulsing glow base,
+    //   edgeGlow — track-edge emissive, night — 0..1 star factor
+    keyframes: [
+      {
+        at: 0.0, name: "dawn", glyph: "🌅",
+        sky: 0x3a2554, fog: 0x4a2a5e, fogNear: 24, fogFar: 95,
+        hemi: 0.6, hemiSky: 0xff9e7a, hemiGround: 0x2a1a3a,
+        dir: 0.5, dirColor: 0xffb27a, rim: 46, edgeGlow: 0.55, night: 0.4,
+      },
+      {
+        at: 0.15, name: "day", glyph: "☀️",
+        sky: 0x8fd0ff, fog: 0xa8dcff, fogNear: 34, fogFar: 135,
+        hemi: 1.0, hemiSky: 0xcfe8ff, hemiGround: 0x55607a,
+        dir: 1.35, dirColor: 0xfff2dd, rim: 34, edgeGlow: 0.3, night: 0,
+      },
+      {
+        at: 0.5, name: "dusk", glyph: "🌇",
+        sky: 0x3d1f52, fog: 0x54235a, fogNear: 24, fogFar: 95,
+        hemi: 0.65, hemiSky: 0xff7a5c, hemiGround: 0x301845,
+        dir: 0.45, dirColor: 0xff8a5c, rim: 48, edgeGlow: 0.6, night: 0.35,
+      },
+      {
+        at: 0.65, name: "night", glyph: "🌙",
+        sky: 0x07070f, fog: 0x0a0a18, fogNear: 20, fogFar: 90,
+        hemi: 0.4, hemiSky: 0x2a2f66, hemiGround: 0x120a24,
+        dir: 0.16, dirColor: 0x8fa8ff, rim: 55, edgeGlow: 0.85, night: 1,
+      },
+    ],
+  },
+
   score: {
     distanceScale: 1,
     bestKey: "neon-runner-best",

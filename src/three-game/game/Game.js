@@ -6,6 +6,7 @@ import { CoinSpawner } from "./CoinSpawner.js";
 import { CollisionSystem } from "../systems/CollisionSystem.js";
 import { ScoreSystem } from "../systems/ScoreSystem.js";
 import { LevelSystem } from "../systems/LevelSystem.js";
+import { DayNightCycle } from "../systems/DayNightCycle.js";
 import { ParticleSystem } from "../systems/ParticleSystem.js";
 import { BulletSystem } from "../systems/BulletSystem.js";
 import { PowerUpSpawner } from "./PowerUpSpawner.js";
@@ -40,6 +41,10 @@ export class Game {
     this.world = new World(engine.scene);
     this.player = new Player(engine.scene, events);
     this.difficulty = new LevelSystem(events);
+    // Sky clock: starts at dawn, painted onto the world immediately so even
+    // the ready screen sits under the right sky.
+    this.dayNight = new DayNightCycle(events);
+    this.world.applyCycle(this.dayNight);
     this.obstacles = new ObstacleSpawner(engine.scene, this.difficulty);
     this.coins = new CoinSpawner(engine.scene);
     this.collisions = new CollisionSystem();
@@ -169,6 +174,9 @@ export class Game {
     this.coins.reset();
     this.score.reset();
     this.difficulty.reset();
+    this.dayNight.reset();
+    this.world.applyCycle(this.dayNight); // snap the sky back to dawn
+    this.events.emit("daynight:phase", this.dayNight.state);
     this.particles.reset();
     this.cameraFX.reset();
     this.powerUps.reset();
@@ -249,6 +257,9 @@ export class Game {
         this.speed + CONFIG.speed.acceleration * dt
       );
       this.difficulty.update(dt);
+      // The sky clock only runs while playing — a paused run freezes the sun.
+      this.dayNight.update(dt);
+      this.world.applyCycle(this.dayNight);
 
       this.player.handleInput(this.input);
 

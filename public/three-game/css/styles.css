@@ -182,6 +182,28 @@ body.is-paused #game-root canvas {
   transform: translateX(-50%) scale(1);
 }
 
+/* Sky chip — the day/night clock, top-left, mirrored against the mute button. */
+#hud-sky {
+  position: absolute;
+  top: calc(20px + var(--safe-top));
+  left: calc(20px + env(safe-area-inset-left));
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: rgba(10, 14, 26, 0.55);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  backdrop-filter: blur(6px);
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  pointer-events: none;
+  white-space: nowrap;
+  transition: color 0.6s ease, border-color 0.6s ease;
+}
+
 @keyframes dash-pulse {
   0%,
   100% {
@@ -474,6 +496,11 @@ kbd {
 }
 
 @media (max-width: 520px) {
+  #hud-sky {
+    top: calc(12px + var(--safe-top));
+    left: calc(12px + env(safe-area-inset-left));
+  }
+
   #hud-top {
     top: calc(12px + var(--safe-top));
     gap: 8px;

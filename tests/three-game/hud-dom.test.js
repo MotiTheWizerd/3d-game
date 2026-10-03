@@ -132,6 +132,7 @@ function buildDocument() {
     ["hud-dash-fill", "div"],
     ["hud-powerups", "div"],
     ["hud-level", "div"],
+    ["hud-sky", "div"],
   ]) {
     const node = el(id, tag);
     doc.byId[id] = node;
@@ -290,6 +291,7 @@ test("powerup badges appear on collect and fade out on expiry", () => {
   assert.ok(!badge.classList.contains("active"));
   assert.equal(badge.style.opacity, "0");
   assert.equal(hud.powerupEl.children.length, 1, "removed only after the 300ms fade");
+});
 
 // ---- Level toast -----------------------------------------------------------------
 
@@ -324,4 +326,25 @@ test("a DOM without the level markup never crashes the HUD", () => {
   hud.hide();
   assert.equal(hud.levelEl, null);
 });
+
+// ---- Sky chip (day/night) -----------------------------------------------------------
+
+test("daynight:phase paints the sky chip with glyph and name", () => {
+  const { hud, events } = makeHud();
+
+  events.emit("daynight:phase", { phase: 0, name: "dawn", glyph: "🌅" });
+  assert.equal(hud.skyEl.textContent, "🌅 dawn");
+
+  events.emit("daynight:phase", { phase: 0.7, name: "night", glyph: "🌙" });
+  assert.equal(hud.skyEl.textContent, "🌙 night", "chip reuses the one element");
+});
+
+test("a DOM without the sky chip never crashes the HUD", () => {
+  globalThis.document = buildDocument();
+  delete globalThis.document.byId["hud-sky"];
+  const events = new EventBus();
+  const hud = new HUD(events);
+
+  events.emit("daynight:phase", { phase: 0.5, name: "dusk", glyph: "🌇" });
+  assert.equal(hud.skyEl, null);
 });

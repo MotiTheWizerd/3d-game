@@ -31,6 +31,8 @@ export class HUD {
     // Level toast (optional markup — a missing element degrades to no toast).
     this.levelEl = document.getElementById("hud-level");
     this.levelToastTimer = null;
+    // Day/night sky chip (optional markup — missing element = no chip).
+    this.skyEl = document.getElementById("hud-sky");
 
     this.onButton = null;
     this.onRestart = null;
@@ -80,6 +82,9 @@ export class HUD {
       }, 1600);
     });
 
+    // Sky clock: repaint the chip whenever a keyframe boundary is crossed.
+    this.events.on("daynight:phase", (state) => this.setSky(state));
+
     // Power-up indicators.
     this.events.on("powerup:collected", ({ type }) => {
       if (!this.powerupEls[type]) {
@@ -125,6 +130,12 @@ export class HUD {
     this.pauseEl.title = paused ? "Resume run" : "Pause run";
     this.pauseEl.setAttribute("aria-label", this.pauseEl.title);
     this.pauseEl.classList.toggle("is-resume", paused);
+  }
+
+  /** The sky chip: glyph + phase name from the cycle's segment snapshot. */
+  setSky(state) {
+    if (!this.skyEl) return;
+    this.skyEl.textContent = `${state.glyph} ${state.name}`;
   }
 
   showReady(best) {
